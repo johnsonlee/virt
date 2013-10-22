@@ -9,6 +9,7 @@ lib-cov
 
 pids
 logs
+build
 results
 
 npm-debug.log
