@@ -51,7 +51,7 @@ VirtualConnection.prototype = Object.create(VirtualNode.prototype, {
 });
 
 VirtualConnection.prototype.open = function(uri) {
-    if (this.id != 0) {
+    if (this.id) {
         this.close();
     }
 
@@ -60,7 +60,7 @@ VirtualConnection.prototype.open = function(uri) {
 
 VirtualConnection.prototype.close = function() {
     libvirt.virConnectClose(this.id);
-    this.id = 0;
+    this.id = null;
 };
 
 VirtualConnection.prototype.__defineGetter__('uri', function() {
