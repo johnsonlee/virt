@@ -1,19 +1,16 @@
-var VirtualConnction = require('../');
+var virt = require('../');
 
-var conn = new VirtualConnction();
+var conn = virt.virConnectOpen('qemu:///system');
 
-try {
-    conn.open('qemu:///system');
-    console.log('Connection id: ' + conn.id);
-    console.log('Connection hostname: ' + conn.hostname);
-    console.log('Connection Max Vcpus: ' + conn.maxVcpus);
-    console.log('Connection version: ' + conn.version);
-    console.log('Connection lib version: ' + conn.libVersion);
-    console.log('node free memory: ' + conn.freeMemory);
-    console.log('node info: ' + JSON.stringify(conn.info));
-} catch (e) {
-    console.error(e.stack);
-} finally {
-    conn.close();
+if (conn) {
+    console.log('Connection: ' + conn);
+    console.log('Connection hostname: ' + virt.virConnectGetHostname(conn));
+    console.log('Connection Max Vcpus: ' + virt.virConnectGetMaxVcpus(conn));
+    console.log('Connection version: ' + virt.virConnectGetVersion(conn));
+    console.log('Connection lib version: ' + virt.virConnectGetLibVersion(conn));
+    console.log('node free memory: ' + virt.virNodeGetFreeMemory(conn));
+    console.log('node info: ' + JSON.stringify(virt.virNodeGetInfo(conn)));
+
+    virt.virConnectClose(conn);
 }
 

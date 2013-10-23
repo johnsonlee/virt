@@ -40,7 +40,7 @@ static virConnectPtr getConnection(v8::Handle<v8::Value> obj)
  *           The connection id
  * @return the node detail information
  */
-static v8::Handle<v8::Value> VirtualNode_info(const v8::Arguments& args)
+static v8::Handle<v8::Value> __virNodeGetInfo(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
@@ -73,7 +73,7 @@ static v8::Handle<v8::Value> VirtualNode_info(const v8::Arguments& args)
 /**
  * Get node free memory
  */
-static v8::Handle<v8::Value> VirtualNode_freeMemory(const v8::Arguments& args)
+static v8::Handle<v8::Value> __virNodeGetFreeMemory(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
@@ -100,7 +100,7 @@ static v8::Handle<v8::Value> VirtualNode_freeMemory(const v8::Arguments& args)
  *           QEMU URI
  * @return connection id
  */
-static v8::Handle<v8::Value> VirtualConnection_open(const v8::Arguments& args)
+static v8::Handle<v8::Value> __virConnectOpen(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
@@ -128,7 +128,7 @@ static v8::Handle<v8::Value> VirtualConnection_open(const v8::Arguments& args)
  * @param id {@link Number}
  *           The connection id
  */
-static v8::Handle<v8::Value> VirtualConnection_close(const v8::Arguments& args)
+static v8::Handle<v8::Value> __virConnectClose(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
@@ -156,7 +156,7 @@ static v8::Handle<v8::Value> VirtualConnection_close(const v8::Arguments& args)
  * 
  * @return the type string
  */
-static v8::Handle<v8::Value> VirtualConnection_type(const v8::Arguments& args)
+static v8::Handle<v8::Value> __virConnectGetType(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
@@ -183,7 +183,7 @@ static v8::Handle<v8::Value> VirtualConnection_type(const v8::Arguments& args)
  * 
  * @return the version number
  */
-static v8::Handle<v8::Value> VirtualConnection_version(const v8::Arguments& args)
+static v8::Handle<v8::Value> __virConnectGetVersion(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
@@ -210,7 +210,7 @@ static v8::Handle<v8::Value> VirtualConnection_version(const v8::Arguments& args
  * 
  * @return the hostname
  */
-static v8::Handle<v8::Value> VirtualConnection_hostname(const v8::Arguments& args)
+static v8::Handle<v8::Value> __virConnectGetHostname(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
@@ -239,7 +239,7 @@ static v8::Handle<v8::Value> VirtualConnection_hostname(const v8::Arguments& arg
  * 
  * @return the max virtual cpu number
  */
-static v8::Handle<v8::Value> VirtualConnection_maxVcpus(const v8::Arguments& args)
+static v8::Handle<v8::Value> __virConnectGetMaxVcpus(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
@@ -273,7 +273,7 @@ static v8::Handle<v8::Value> VirtualConnection_maxVcpus(const v8::Arguments& arg
  * 
  * @return the version number
  */
-static v8::Handle<v8::Value> VirtualConnection_libVersion(const v8::Arguments& args)
+static v8::Handle<v8::Value> __virConnectGetLibVersion(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
@@ -300,16 +300,16 @@ void init(v8::Handle<v8::Object> target)
 {
     v8::HandleScope scope;
 
-    NODE_SET_METHOD(target, "virNodeGetInfo",          VirtualNode_info);
-    NODE_SET_METHOD(target, "virNodeGetFreeMemory",    VirtualNode_freeMemory);
+    NODE_SET_METHOD(target, "virNodeGetInfo",          __virNodeGetInfo);
+    NODE_SET_METHOD(target, "virNodeGetFreeMemory",    __virNodeGetFreeMemory);
 
-    NODE_SET_METHOD(target, "virConnectOpen",          VirtualConnection_open);
-    NODE_SET_METHOD(target, "virConnectClose",         VirtualConnection_close);
-    NODE_SET_METHOD(target, "virConnectGetType",       VirtualConnection_type);
-    NODE_SET_METHOD(target, "virConnectGetVersion",    VirtualConnection_version);
-    NODE_SET_METHOD(target, "virConnectGetHostname",   VirtualConnection_hostname);
-    NODE_SET_METHOD(target, "virConnectGetMaxVcpus",   VirtualConnection_maxVcpus);
-    NODE_SET_METHOD(target, "virConnectGetLibVersion", VirtualConnection_libVersion);
+    NODE_SET_METHOD(target, "virConnectOpen",          __virConnectOpen);
+    NODE_SET_METHOD(target, "virConnectClose",         __virConnectClose);
+    NODE_SET_METHOD(target, "virConnectGetType",       __virConnectGetType);
+    NODE_SET_METHOD(target, "virConnectGetVersion",    __virConnectGetVersion);
+    NODE_SET_METHOD(target, "virConnectGetHostname",   __virConnectGetHostname);
+    NODE_SET_METHOD(target, "virConnectGetMaxVcpus",   __virConnectGetMaxVcpus);
+    NODE_SET_METHOD(target, "virConnectGetLibVersion", __virConnectGetLibVersion);
 }
 
 #ifdef __cplusplus

@@ -6,6 +6,10 @@
         "virt",
         "libvirt"
      ],
+     "repository" : {
+        "type" : "git",
+        "url" : "http://github.com/johnsonlee/virt.git"
+     },
     "license" : "MIT",
     "script" : {
         "preinstall" : "node-gyp configure rebuild"
