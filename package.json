@@ -1,0 +1,18 @@
+{
+    "name" : "virt",
+    "description" : "nodejs wrapper of libvirt",
+    "version" : "1.0.0",
+    "keywords" : [
+        "virt",
+        "libvirt"
+     ],
+    "license" : "MIT",
+    "script" : {
+        "preinstall" : "node-gyp configure rebuild"
+    },
+    "bugs" : {
+        "url" : "http://github.com/johnsonlee/virt/issues",
+        "email" : "g.johnsonlee@gmail.com"
+    }
+}
+
