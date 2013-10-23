@@ -1,7 +1,7 @@
 {
     "name" : "virt",
     "description" : "nodejs wrapper of libvirt",
-    "version" : "1.0.2",
+    "version" : "1.0.4",
     "keywords" : [
         "virt",
         "libvirt"

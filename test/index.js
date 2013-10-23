@@ -1,6 +1,12 @@
 var virt = require('../');
 
-var conn = virt.virConnectOpen('qemu:///system');
+var conn = virt.virConnectOpenAuth('qemu:///system', {
+        credtypes : [1, 2],
+        callback : function(credentials, userdata) {
+            console.log(userdata);
+        },
+        userdata : 'helloworld',
+}, 1);
 
 if (conn) {
     console.log('Connection: ' + conn);

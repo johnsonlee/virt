@@ -1,16 +1,17 @@
-## virt
+# virt
 
 This package is a wrapper of libvirt for node js.
 
+## Overview
+
 The wrappered API is almost the same as libvirt, about libvirt, please see:
-  API Reference: http://libvirt.org/html/libvirt-libvirt.html
-  Development Guide: http://libvirt.org/devguide.html
 
+ * API Reference: http://libvirt.org/html/libvirt-libvirt.html
+ * Development Guide: http://libvirt.org/devguide.html
 
-## example
+## Example
 
 ``` js
-
 var virt = require('virt');
 
 var conn = virt.virConnectOpen('qemu:///system');
@@ -31,11 +32,9 @@ if (conn) {
 }
 ```
 
-
 ## TODO
 
  - Add non-*nix platform support
-
 
 ## License
 

@@ -11,6 +11,15 @@
 #include <libvirt/libvirt.h>
 #include <uuid/uuid.h>
 
+struct AuthCallbackData
+{
+    v8::Handle<v8::Value> callback;
+    v8::Handle<v8::Value> userdata;
+
+    AuthCallbackData() : callback(NULL), userdata(NULL) {
+    }
+};
+
 /**
  * All connections
  */
@@ -94,10 +103,10 @@ static v8::Handle<v8::Value> __virNodeGetFreeMemory(const v8::Arguments& args)
 }
 
 /**
- * Open the specified QEMU URI
+ * Open the specified hypervisor URI
  * 
  * @param uri {@link String}
- *           QEMU URI
+ *           The hypervisor URI
  * @return connection id
  */
 static v8::Handle<v8::Value> __virConnectOpen(const v8::Arguments& args)
@@ -109,17 +118,136 @@ static v8::Handle<v8::Value> __virConnectOpen(const v8::Arguments& args)
         return scope.Close(v8::Undefined());
     }
 
-    uuid_t raw = {0};
-    char uuid[36] = {0};
     virConnectPtr conn = NULL;
     v8::String::Utf8Value uri(args[0]->ToString());
 
-    conn = virConnectOpen(*uri);
-    uuid_generate(raw);
-    uuid_unparse_lower(raw, uuid);
-    connections[uuid] = conn;
+    if (NULL != (conn = virConnectOpen(*uri))) {
+        uuid_t raw = {0};
+        char uuid[36] = {0};
 
-    return scope.Close(v8::String::New(uuid));
+        uuid_generate(raw);
+        uuid_unparse_lower(raw, uuid);
+        connections[uuid] = conn;
+
+        return scope.Close(v8::String::New(uuid));
+    }
+
+    return scope.Close(v8::Undefined());
+}
+
+/**
+ * Callback wrapper of virConnectOpenAuth
+ * 
+ * function() {
+ * }
+ */
+static int __virConnectAuthCallback(virConnectCredentialPtr cred, unsigned int ncred, void *cbdata)
+{
+    AuthCallbackData *authData = reinterpret_cast<AuthCallbackData*>(cbdata);
+    v8::Handle<v8::Value> callback = authData->callback;
+    v8::Handle<v8::Value> userdata = authData->userdata;
+
+    if (callback->IsFunction()) {
+        v8::Local<v8::Object> global = v8::Context::GetCurrent()->Global();
+        v8::Local<v8::Array> creds = v8::Array::New(ncred);
+        v8::Handle<v8::Value> args[] = { creds, userdata };
+        v8::Handle<v8::Function> func = v8::Handle<v8::Function>::Cast(callback);
+
+        for (unsigned int i = 0; i < ncred; i++) {
+            virConnectCredential *credPtr = cred + i;
+            v8::Local<v8::Object> credential = v8::Object::New();
+
+            credential->Set(v8::String::New("type"), v8::Integer::New(credPtr->type));
+            credential->Set(v8::String::New("prompt"), v8::String::New(credPtr->prompt));
+            credential->Set(v8::String::New("challenge"), v8::String::New(credPtr->challenge));
+            credential->Set(v8::String::New("defresult"), v8::String::New(credPtr->defresult));
+            credential->Set(v8::String::New("result"), v8::String::New(credPtr->result, credPtr->resultlen));
+
+            creds->Set(i, credential);
+        }
+
+        func->Call(global, 2, args);
+    }
+
+    return 0;
+}
+
+/**
+ * Open the specified URI with authentication
+ * 
+ * @param uri {@link String}
+ *           The hypervisor URI
+ * @param auth {@link Object}
+ *           Authenticate parameters 
+ * @param flags {@link Number}
+ *           bitwise-OR of connect flags
+ * @return connection id
+ */
+static v8::Handle<v8::Value> __virConnectOpenAuth(const v8::Arguments& args)
+{
+    v8::HandleScope scope;
+
+    if (args.Length() != 3 || !args[0]->IsString() || !args[1]->IsObject() || !args[2]->IsUint32()) {
+        v8::ThrowException(v8::Exception::Error(v8::String::New("1. Illegal arguments")));
+        return scope.Close(v8::Undefined());
+    }
+
+    v8::String::Utf8Value uri(args[0]->ToString());
+    v8::Handle<v8::Object> params = v8::Handle<v8::Object>::Cast(args[1]);
+    v8::Local<v8::Value> types = params->Get(v8::String::New("credtypes"));
+    v8::Local<v8::Value> callback = params->Get(v8::String::New("callback"));
+    v8::Local<v8::Value> userdata = params->Get(v8::String::New("userdata"));
+
+    if (!types->IsArray()) {
+        v8::ThrowException(v8::Exception::Error(v8::String::New("2. Illegal arguments")));
+        return scope.Close(v8::Undefined());
+    }
+
+    if (!callback->IsFunction()) {
+        v8::ThrowException(v8::Exception::Error(v8::String::New("3. Illegal arguments")));
+        return scope.Close(v8::Undefined());
+    }
+
+    virConnectPtr conn = NULL;
+    virConnectAuth auth = {};
+    AuthCallbackData cbAuth;
+    uint32_t flags = args[2]->Uint32Value();
+
+    v8::Handle<v8::Value> result = v8::Undefined();
+    v8::Local<v8::Array> credTypes = v8::Array::Cast(*types);
+
+    if (credTypes->Length() > 0) {
+        auth.ncredtype = credTypes->Length();
+        auth.credtype = new int[auth.ncredtype];
+
+        for (uint32_t i = 0; i < auth.ncredtype; i++) {
+            auth.credtype[i] = credTypes->Get(i)->IntegerValue();
+        }
+    }
+
+    if (!userdata->IsNull() && !userdata->IsUndefined()) {
+        cbAuth.userdata = userdata;
+        cbAuth.callback = callback;
+        auth.cbdata = &cbAuth;
+    }
+
+    auth.cb = __virConnectAuthCallback;
+
+    if (NULL != (conn = virConnectOpenAuth(*uri, &auth, flags))) {
+        uuid_t raw = {0};
+        char uuid[36] = {0};
+
+        uuid_generate(raw);
+        uuid_unparse_lower(raw, uuid);
+        connections[uuid] = conn;
+        result = v8::String::New(uuid);
+    }
+
+    if (auth.credtype) {
+        delete auth.credtype;
+    }
+
+    return scope.Close(result);
 }
 
 /**
@@ -304,6 +432,7 @@ void init(v8::Handle<v8::Object> target)
     NODE_SET_METHOD(target, "virNodeGetFreeMemory",    __virNodeGetFreeMemory);
 
     NODE_SET_METHOD(target, "virConnectOpen",          __virConnectOpen);
+    NODE_SET_METHOD(target, "virConnectOpenAuth",     __virConnectOpenAuth);
     NODE_SET_METHOD(target, "virConnectClose",         __virConnectClose);
     NODE_SET_METHOD(target, "virConnectGetType",       __virConnectGetType);
     NODE_SET_METHOD(target, "virConnectGetVersion",    __virConnectGetVersion);
