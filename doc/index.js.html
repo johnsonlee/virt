@@ -1,7 +1,35 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: index.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: index.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * {@link https://libvirt.org libvirt} API doc for Node
  * 
- * @author Johnson Lee <g.johnsonlee@gmail.com>
+ * @author Johnson Lee &lt;g.johnsonlee@gmail.com>
  * @overview
  * @version 1.0.4
  */
@@ -21,24 +49,24 @@ function Connection() {
 }
 
 /**
- * <p>This function should be called first to get a connection to the
- * Hypervisor and xen store</p>
+ * &lt;p>This function should be called first to get a connection to the
+ * Hypervisor and xen store&lt;/p>
  * 
- * <p>If <code>name</code> is null or undefined, if the
- * <code>LIBVIRT_DEFAULT_URI</code> environment variable is set, then it
+ * &lt;p>If &lt;code>name&lt;/code> is null or undefined, if the
+ * &lt;code>LIBVIRT_DEFAULT_URI&lt;/code> environment variable is set, then it
  * will be used. Otherwise if the client configuration file has the
  * "uri_default" parameter set, then it will be used. Finally probing will
  * be done to determine a suitable default driver to activate. This
- * involves trying each hypervisor in turn until one successfully opens.</p>
+ * involves trying each hypervisor in turn until one successfully opens.&lt;/p>
  * If connecting to an unprivileged hypervisor driver which requires the
  * libvirtd daemon to be active, it will automatically be launched if not
  * already running. This can be prevented by setting the environment
- * variable <code>LIBVIRT_AUTOSTART=0</code></p>
+ * variable &lt;code>LIBVIRT_AUTOSTART=0&lt;/code>&lt;/p>
  * 
- * <p>URIs are documented at {@link http://libvirt.org/uri.html}</p>
+ * &lt;p>URIs are documented at {@link http://libvirt.org/uri.html}&lt;/p>
  * 
- * <p>{@link Connection#close()} should be used to release the resources
- * after the connection is no longer needed.</p>
+ * &lt;p>{@link Connection#close()} should be used to release the resources
+ * after the connection is no longer needed.&lt;/p>
  * 
  * @param name {String}
  *        URI of the hypervisor, optional
@@ -50,15 +78,15 @@ Connection.open = function() {
 };
 
 /**
- * <p>This function should be called first to get a connection to the
+ * &lt;p>This function should be called first to get a connection to the
  * Hypervisor. If necessary, authentication will be performed fetching
- * credentials via the callback</p>
+ * credentials via the callback&lt;/p>
  * 
- * <p>See {@link Connection#open()} for notes about environment variables
+ * &lt;p>See {@link Connection#open()} for notes about environment variables
  * which can have an effect on opening drivers and freeing the connection
- * resources</p>
+ * resources&lt;/p>
  * 
- * <p>URIs are documented at {@link http://libvirt.org/uri.html}</p>
+ * &lt;p>URIs are documented at {@link http://libvirt.org/uri.html}&lt;/p>
  * 
  * @param name {String}
  *        URI of the hypervisor, optional
@@ -76,15 +104,15 @@ Connection.openAuth = function() {
 };
 
 /**
- * <p>This function should be called first to get a restricted connection to
+ * &lt;p>This function should be called first to get a restricted connection to
  * the library functionalities. The set of APIs usable are then restricted
- * on the available methods to control the domains.</p>
+ * on the available methods to control the domains.&lt;/p>
  * 
- * <p>See {@link Connection#open()} for notes about environment variables
+ * &lt;p>See {@link Connection#open()} for notes about environment variables
  * which can have an effect on opening drivers and freeing the connection
- * resources</p>
+ * resources&lt;/p>
  * 
- * <p>URIs are documented at {@link http://libvirt.org/uri.html}</p>
+ * &lt;p>URIs are documented at {@link http://libvirt.org/uri.html}&lt;/p>
  * 
  * @param name {String}
  *        URI of the hypervisor, optional
@@ -223,10 +251,10 @@ Connection.prototype = {
     /**
      * Provides the maximum number of virtual CPUs supported for a guest VM of
      * a specific type. The 'type' parameter here corresponds to the 'type'
-     * attribute in the <domain> element of the XML
+     * attribute in the &lt;domain> element of the XML
      * 
      * @param type {String}
-     *        value of the 'type' attribute in the <domain> element
+     *        value of the 'type' attribute in the &lt;domain> element
      * @return {Number} the maximum of virtual CPU
      * @throws {Error}
      */
@@ -236,7 +264,7 @@ Connection.prototype = {
 
     /**
      * This returns the XML description of the sysinfo details for the host on
-     * which the hypervisor is running, in the same format as the <sysinfo>
+     * which the hypervisor is running, in the same format as the &lt;sysinfo>
      * element of a domain XML. This information is generally available only
      * for hypervisors running with root privileges.
      * 
@@ -266,7 +294,7 @@ Connection.prototype = {
      * This returns the URI (name) of the hypervisor connection. Normally this
      * is the same as or similar to the string passed to the
      * {@link Connection#open()} / {@link virConnectOpenReadOnly} call, but the
-     * driver may make the URI canonical. If name is <code>null</code> was
+     * driver may make the URI canonical. If name is &lt;code>null&lt;/code> was
      * passed to {@link Connection#open()}, then the driver will return a non-NULL
      * URI which can be used to connect to the same hypervisor later.
      * 
@@ -317,15 +345,15 @@ Connection.prototype = {
     },
 
     /**
-     * <p>Increment the reference count on the connection. For each additional
+     * &lt;p>Increment the reference count on the connection. For each additional
      * call to this method, there shall be a corresponding call to
      * {@link Connection#close()} to release the reference count, once the caller
-     * no longer needs the reference to this object.</p>
+     * no longer needs the reference to this object.&lt;/p>
      * 
-     * <p>This method is typically useful for applications where multiple
+     * &lt;p>This method is typically useful for applications where multiple
      * threads are using a connection, and it is required that the connection
      * remain open until all threads have finished using it. ie, each new
-     * thread using a connection would increment the reference count.</p>
+     * thread using a connection would increment the reference count.&lt;/p>
      * 
      * @throws {Error}
      */
@@ -334,13 +362,13 @@ Connection.prototype = {
     },
 
     /**
-     * Start sending keepalive messages after <code>interval</code> seconds of
+     * Start sending keepalive messages after &lt;code>interval&lt;/code> seconds of
      * inactivity and consider the connection to be broken when no response is
-     * received after <code>count</code> keepalive messages sent in a row. In
-     * other words, sending <code>count + 1</code> keepalive message results in
-     * closing the connection. When <code>interval</code> is <= 0, no keepalive
-     * messages will be sent. When <code>count</code> is 0, the connection will
-     * be automatically closed after <code>interval</code> seconds of
+     * received after &lt;code>count&lt;/code> keepalive messages sent in a row. In
+     * other words, sending &lt;code>count + 1&lt;/code> keepalive message results in
+     * closing the connection. When &lt;code>interval&lt;/code> is &lt;= 0, no keepalive
+     * messages will be sent. When &lt;code>count&lt;/code> is 0, the connection will
+     * be automatically closed after &lt;code>interval&lt;/code> seconds of
      * inactivity without sending any keepalive messages.
      * 
      * @param interval {Number}
@@ -387,7 +415,7 @@ Connection.prototype = {
     /**
      * This function provides individual cpu statistics of the node. If you
      * want to get total cpu statistics of the node, you must specify
-     * {@link VIR_NODE_CPU_STATS_ALL_CPUS} to <code>cpuNum</code>.
+     * {@link VIR_NODE_CPU_STATS_ALL_CPUS} to &lt;code>cpuNum&lt;/code>.
      * 
      * @param cpuNum {Number}
      *        number of node cpu
@@ -697,3 +725,26 @@ function TypedParameter() {
 
 }).call(module.exports);
 
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Connection.html">Connection</a></li><li><a href="ConnectionAuth.html">ConnectionAuth</a></li><li><a href="NodeCPUStats.html">NodeCPUStats</a></li><li><a href="NodeInfo.html">NodeInfo</a></li><li><a href="PageAllocation.html">PageAllocation</a></li><li><a href="TypedParameter.html">TypedParameter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getVersion">getVersion</a></li><li><a href="global.html#VIR_CONNECT_BASELINE_CPU_EXPAND_FEATURES">VIR_CONNECT_BASELINE_CPU_EXPAND_FEATURES</a></li><li><a href="global.html#VIR_CONNECT_BASELINE_CPU_MIGRATABLE">VIR_CONNECT_BASELINE_CPU_MIGRATABLE</a></li><li><a href="global.html#VIR_CONNECT_NO_ALIASES">VIR_CONNECT_NO_ALIASES</a></li><li><a href="global.html#VIR_CONNECT_RO">VIR_CONNECT_RO</a></li><li><a href="global.html#VIR_CPU_COMPARE_ERROR">VIR_CPU_COMPARE_ERROR</a></li><li><a href="global.html#VIR_CPU_COMPARE_IDENTICAL">VIR_CPU_COMPARE_IDENTICAL</a></li><li><a href="global.html#VIR_CPU_COMPARE_INCOMPATIBLE">VIR_CPU_COMPARE_INCOMPATIBLE</a></li><li><a href="global.html#VIR_CPU_COMPARE_LAST">VIR_CPU_COMPARE_LAST</a></li><li><a href="global.html#VIR_CPU_COMPARE_SUPERSET">VIR_CPU_COMPARE_SUPERSET</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Apr 04 2015 18:28:37 GMT+0800 (CST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

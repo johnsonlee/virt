@@ -11,35 +11,51 @@
 #include <libvirt/libvirt.h>
 #include <uuid/uuid.h>
 
-struct AuthCallbackData
+struct virConnectAuthCallback
 {
     v8::Handle<v8::Value> callback;
     v8::Handle<v8::Value> userdata;
 
-    AuthCallbackData() : callback(NULL), userdata(NULL) {
+    virConnectAuthCallback() : callback(NULL), userdata(NULL) {
     }
 };
 
 /**
  * All connections
  */
-static std::map<std::string, virConnectPtr> connections;
+static std::map<const char*, virConnectPtr> connections;
 
-static virConnectPtr getConnection(v8::Handle<v8::Value> obj)
+/**
+ * Lookup connection by URI
+ */
+static virConnectPtr lookup(v8::Handle<v8::Value> obj)
 {
-    typedef typename std::map<std::string, virConnectPtr>::iterator iterator;
+    typedef typename std::map<const char*, virConnectPtr>::const_iterator iterator_t;
 
-    v8::String::Utf8Value arg(obj->ToString());
-    char *key = strdup(*arg);
-    iterator it = connections.find(key);
+    const v8::String::Utf8Value uri(obj->ToString());
+    iterator_t i = connections.find(*uri);
 
-    free(key);
-
-    if (it != connections.end()) {
-        return it->second;
+    if (i != connections.end()) {
+        return i->second;
     }
 
     return NULL;
+}
+
+/**
+ * Provides version information
+ */
+static v8::Handle<v8::Value> __virGetVersion(const v8::Arguments& args)
+{
+    unsigned long libVer;
+    v8::HandleScope scope;
+
+    if (0 == virGetVersion(&libVer, NULL, NULL)) {
+        return scope.Close(v8::Number::New(libVer));
+    } else {
+        v8::ThrowException(v8::Exception::Error(v8::String::New("Unknown error")));
+        return scope.Close(v8::Undefined());
+    }
 }
 
 /**
@@ -59,7 +75,7 @@ static v8::Handle<v8::Value> __virNodeGetInfo(const v8::Arguments& args)
     }
 
     virNodeInfo info;
-    virConnectPtr conn = getConnection(args[0]);
+    virConnectPtr conn = lookup(args[0]);
 
     if (NULL != conn && 0 == virNodeGetInfo(conn, &info)) {
         v8::Local<v8::Object> obj = v8::Object::New();
@@ -91,7 +107,7 @@ static v8::Handle<v8::Value> __virNodeGetFreeMemory(const v8::Arguments& args)
         return scope.Close(v8::Undefined());
     }
 
-    virConnectPtr conn = getConnection(args[0]);
+    virConnectPtr conn = lookup(args[0]);
 
     if (NULL != conn) {
         unsigned long long fm = virNodeGetFreeMemory(conn);
@@ -102,19 +118,35 @@ static v8::Handle<v8::Value> __virNodeGetFreeMemory(const v8::Arguments& args)
     return scope.Close(v8::Undefined());
 }
 
-/**
- * Open the specified hypervisor URI
- * 
- * @param uri {@link String}
- *           The hypervisor URI
- * @return connection id
- */
+static v8::Handle<v8::Value> __virConnectBaselineCPU(const v8::Arguments& args)
+{
+    v8::HandleScope scope;
+
+    if (args.Length() < 4
+            || !args[0]->IsString()
+            || !args[1]->IsArray()
+            || !args[2]->IsUint32()
+            || !args[3]->IsUint32()) {
+        v8::ThrowException(v8::Exception::Error(v8::String::New("Invalid URI")));
+        return scope.Close(v8::Undefined());
+    }
+
+    virConnectPtr conn = lookup(args[0]);
+    v8::Handle<v8::Array> cpus = v8::Handle<v8::Array>::Cast(args[1]);
+    unsigned int ncpus = args[2]->Uint32Value();
+    unsigned int flags = args[3]->Uint32Value();
+    // char **xmlCPUs = NULL;
+    // char *xml = virConnectBaselineCPU(conn, xmlCPUs, ncpus, flags);
+    // TODO
+    return scope.Close(v8::Undefined());
+}
+
 static v8::Handle<v8::Value> __virConnectOpen(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
-    if (args.Length() != 1 || !args[0]->IsString()) {
-        v8::ThrowException(v8::Exception::Error(v8::String::New("libvirt URI format error")));
+    if (args.Length() < 1 || !args[0]->IsString()) {
+        v8::ThrowException(v8::Exception::Error(v8::String::New("Invalid URI")));
         return scope.Close(v8::Undefined());
     }
 
@@ -126,7 +158,7 @@ static v8::Handle<v8::Value> __virConnectOpen(const v8::Arguments& args)
         char uuid[36] = {0};
 
         uuid_generate(raw);
-        uuid_unparse_lower(raw, uuid);
+        uuid_unparse(raw, uuid);
         connections[uuid] = conn;
 
         return scope.Close(v8::String::New(uuid));
@@ -135,15 +167,11 @@ static v8::Handle<v8::Value> __virConnectOpen(const v8::Arguments& args)
     return scope.Close(v8::Undefined());
 }
 
-/**
- * Callback wrapper of virConnectOpenAuth
- * 
- * function() {
- * }
- */
+#define __virConnectOpenReadOnly __virConnectOpen
+
 static int __virConnectAuthCallback(virConnectCredentialPtr cred, unsigned int ncred, void *cbdata)
 {
-    AuthCallbackData *authData = reinterpret_cast<AuthCallbackData*>(cbdata);
+    virConnectAuthCallback *authData = reinterpret_cast<virConnectAuthCallback*>(cbdata);
     v8::Handle<v8::Value> callback = authData->callback;
     v8::Handle<v8::Value> userdata = authData->userdata;
 
@@ -187,50 +215,50 @@ static v8::Handle<v8::Value> __virConnectOpenAuth(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
-    if (args.Length() != 3 || !args[0]->IsString() || !args[1]->IsObject() || !args[2]->IsUint32()) {
-        v8::ThrowException(v8::Exception::Error(v8::String::New("1. Illegal arguments")));
+    if (args.Length() < 3
+        || !args[0]->IsString()
+        || !args[1]->IsObject()
+        || !args[2]->IsUint32()) {
+        v8::ThrowException(v8::Exception::Error(v8::String::New("Illegal arguments")));
         return scope.Close(v8::Undefined());
     }
 
-    v8::String::Utf8Value uri(args[0]->ToString());
-    v8::Handle<v8::Object> params = v8::Handle<v8::Object>::Cast(args[1]);
-    v8::Local<v8::Value> types = params->Get(v8::String::New("credtypes"));
-    v8::Local<v8::Value> callback = params->Get(v8::String::New("callback"));
-    v8::Local<v8::Value> userdata = params->Get(v8::String::New("userdata"));
+    v8::Handle<v8::Object> arg1 = v8::Handle<v8::Object>::Cast(args[1]);
+    v8::Local<v8::Value> prop1 = arg1 ->Get(v8::String::New("credtypes"));
+    v8::Local<v8::Value> prop2 = arg1->Get(v8::String::New("callback"));
+    v8::Local<v8::Value> prop3 = arg1->Get(v8::String::New("userdata"));
 
-    if (!types->IsArray()) {
-        v8::ThrowException(v8::Exception::Error(v8::String::New("2. Illegal arguments")));
+    if (!prop1->IsArray()) {
+        v8::ThrowException(v8::Exception::Error(v8::String::New("Illegal arguments")));
         return scope.Close(v8::Undefined());
     }
 
-    if (!callback->IsFunction()) {
-        v8::ThrowException(v8::Exception::Error(v8::String::New("3. Illegal arguments")));
+    if (!prop2->IsFunction()) {
+        v8::ThrowException(v8::Exception::Error(v8::String::New("Illegal arguments")));
         return scope.Close(v8::Undefined());
     }
 
     virConnectPtr conn = NULL;
     virConnectAuth auth = {};
-    AuthCallbackData cbAuth;
-    uint32_t flags = args[2]->Uint32Value();
-
+    virConnectAuthCallback cbAuth;
     v8::Handle<v8::Value> result = v8::Undefined();
-    v8::Local<v8::Array> credTypes = v8::Array::Cast(*types);
+    v8::String::Utf8Value uri(args[0]->ToString());
+    v8::Local<v8::Array> credTypes = v8::Array::Cast(*prop1);
+    uint32_t flags = args[2]->Uint32Value();
 
     if (credTypes->Length() > 0) {
         auth.ncredtype = credTypes->Length();
         auth.credtype = new int[auth.ncredtype];
 
         for (uint32_t i = 0; i < auth.ncredtype; i++) {
-            auth.credtype[i] = credTypes->Get(i)->IntegerValue();
+            v8::Local<v8::Value> credType = credTypes->Get(i);
+            auth.credtype[i] = credType->IntegerValue();
         }
     }
 
-    if (!userdata->IsNull() && !userdata->IsUndefined()) {
-        cbAuth.userdata = userdata;
-        cbAuth.callback = callback;
-        auth.cbdata = &cbAuth;
-    }
-
+    cbAuth.callback = prop2;
+    cbAuth.userdata = prop3;
+    auth.cbdata = &cbAuth;
     auth.cb = __virConnectAuthCallback;
 
     if (NULL != (conn = virConnectOpenAuth(*uri, &auth, flags))) {
@@ -238,7 +266,7 @@ static v8::Handle<v8::Value> __virConnectOpenAuth(const v8::Arguments& args)
         char uuid[36] = {0};
 
         uuid_generate(raw);
-        uuid_unparse_lower(raw, uuid);
+        uuid_unparse(raw, uuid);
         connections[uuid] = conn;
         result = v8::String::New(uuid);
     }
@@ -250,50 +278,37 @@ static v8::Handle<v8::Value> __virConnectOpenAuth(const v8::Arguments& args)
     return scope.Close(result);
 }
 
-/**
- * Close the connection by id
- * 
- * @param id {@link Number}
- *           The connection id
- */
 static v8::Handle<v8::Value> __virConnectClose(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
-    if (args.Length() != 1 || !args[0]->IsString()) {
+    if (args.Length() < 1 || !args[0]->IsString()) {
         v8::ThrowException(v8::Exception::Error(v8::String::New("Illegal arguments")));
         return scope.Close(v8::Undefined());
     }
 
-    virConnectPtr conn = getConnection(args[0]);
+    int result = 0;
+    virConnectPtr conn = lookup(args[0]);
 
-    if (NULL != conn && 0 == virConnectClose(conn)) {
+    if (NULL != conn && -1 != (result = virConnectClose(conn))) {
         v8::String::Utf8Value arg(args[0]->ToString());
-
         connections.erase(*arg);
+        return scope.Close(v8::Integer::New(result));
     }
 
     return scope.Close(v8::Undefined());
 }
 
-/**
- * Get connection type
- * 
- * @param id {@link Number}
- *           The connectionn id
- * 
- * @return the type string
- */
 static v8::Handle<v8::Value> __virConnectGetType(const v8::Arguments& args)
 {
     v8::HandleScope scope;
 
-    if (args.Length() != 1 || !args[0]->IsString()) {
+    if (args.Length() < 1 || !args[0]->IsString()) {
         v8::ThrowException(v8::Exception::Error(v8::String::New("Illegal arguments")));
         return scope.Close(v8::Undefined());
     }
 
-    virConnectPtr conn = getConnection(args[0]);
+    virConnectPtr conn = lookup(args[0]);
  
     if (NULL != conn) {
         const char *type = virConnectGetType(conn);
@@ -321,7 +336,7 @@ static v8::Handle<v8::Value> __virConnectGetVersion(const v8::Arguments& args)
     }
 
     unsigned long ver = 0UL;
-    virConnectPtr conn = getConnection(args[0]);
+    virConnectPtr conn = lookup(args[0]);
   
     if (NULL != conn && 0 == virConnectGetVersion(conn, &ver)) {
         return scope.Close(v8::Number::New(ver));
@@ -347,7 +362,7 @@ static v8::Handle<v8::Value> __virConnectGetHostname(const v8::Arguments& args)
         return scope.Close(v8::Undefined());
     }
 
-    virConnectPtr conn = getConnection(args[0]);
+    virConnectPtr conn = lookup(args[0]);
   
     if (NULL != conn) {
         char *host = virConnectGetHostname(conn);
@@ -378,7 +393,7 @@ static v8::Handle<v8::Value> __virConnectGetMaxVcpus(const v8::Arguments& args)
     }
 
     int vcpus = 0;
-    virConnectPtr conn = getConnection(args[0]);
+    virConnectPtr conn = lookup(args[0]);
   
     if (NULL != conn) {
         if (args.Length() > 1) {
@@ -393,14 +408,6 @@ static v8::Handle<v8::Value> __virConnectGetMaxVcpus(const v8::Arguments& args)
     return scope.Close(v8::Integer::New(vcpus));
 }
 
-/**
- * Get connection lib version
- * 
- * @param id {@link Number}
- *           The connectionn id
- * 
- * @return the version number
- */
 static v8::Handle<v8::Value> __virConnectGetLibVersion(const v8::Arguments& args)
 {
     v8::HandleScope scope;
@@ -411,7 +418,7 @@ static v8::Handle<v8::Value> __virConnectGetLibVersion(const v8::Arguments& args
     }
 
     unsigned long ver = 0UL;
-    virConnectPtr conn = getConnection(args[0]);
+    virConnectPtr conn = lookup(args[0]);
   
     if (NULL != conn && 0 == virConnectGetLibVersion(conn, &ver)) {
         return scope.Close(v8::Number::New(ver));
@@ -426,19 +433,25 @@ extern "C" {
 
 void init(v8::Handle<v8::Object> target)
 {
-    v8::HandleScope scope;
+    if (0 != virInitialize()) {
+        v8::ThrowException(v8::Exception::Error(v8::String::New("Initialize virt error")));
+        return;
+    }
 
-    NODE_SET_METHOD(target, "virNodeGetInfo",          __virNodeGetInfo);
-    NODE_SET_METHOD(target, "virNodeGetFreeMemory",    __virNodeGetFreeMemory);
-
+    /* ---------------------------- module host ---------------------------- */
+    NODE_SET_METHOD(target, "virConnectBaselineCPU",   __virConnectBaselineCPU);
     NODE_SET_METHOD(target, "virConnectOpen",          __virConnectOpen);
-    NODE_SET_METHOD(target, "virConnectOpenAuth",     __virConnectOpenAuth);
+    NODE_SET_METHOD(target, "virConnectOpenAuth",      __virConnectOpenAuth);
+    NODE_SET_METHOD(target, "virConnectOpenReadOnly",  __virConnectOpenReadOnly);
     NODE_SET_METHOD(target, "virConnectClose",         __virConnectClose);
     NODE_SET_METHOD(target, "virConnectGetType",       __virConnectGetType);
     NODE_SET_METHOD(target, "virConnectGetVersion",    __virConnectGetVersion);
     NODE_SET_METHOD(target, "virConnectGetHostname",   __virConnectGetHostname);
     NODE_SET_METHOD(target, "virConnectGetMaxVcpus",   __virConnectGetMaxVcpus);
     NODE_SET_METHOD(target, "virConnectGetLibVersion", __virConnectGetLibVersion);
+    NODE_SET_METHOD(target, "virGetVersion",           __virGetVersion);
+    NODE_SET_METHOD(target, "virNodeGetInfo",          __virNodeGetInfo);
+    NODE_SET_METHOD(target, "virNodeGetFreeMemory",    __virNodeGetFreeMemory);
 }
 
 #ifdef __cplusplus

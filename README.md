@@ -9,6 +9,10 @@ The wrappered API is almost the same as libvirt, about libvirt, please see:
  * API Reference: http://libvirt.org/html/libvirt-libvirt.html
  * Development Guide: http://libvirt.org/devguide.html
 
+## References
+
+Please see [API doc](https://rawgit.com/johnsonlee/virt/master/doc/index.html)
+
 ## Example
 
 ``` js
