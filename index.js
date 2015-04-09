@@ -8,17 +8,15 @@
 
 var virt = require('./build/Release/virt.node');
 
+
 /**
  * Hypervisor Connection
  * 
  * @class
  * @see {@link https://libvirt.org/html/libvirt-libvirt-host.html#virConnect}
  */
-function Connection() {
 
-    this.$name = null;
-
-}
+var Connection = virt.Connection;
 
 /**
  * <p>This function should be called first to get a connection to the
@@ -95,367 +93,363 @@ Connection.openReadOnly = function() {
     return virt.virConnectOpenReadOnly.apply(virt, arguments);
 };
 
-Connection.prototype = {
+/**
+ * Registers a callback to be invoked when the connection event occurred
+ * 
+ * @param event {String}
+ *        the name of event
+ * @param listener {Function}
+ *        the callback function
+ */
+Connection.prototype.addEventListener = function(event, listener) {
+    return virt.addEventListener.apply(virt, arguments);
+};
 
-    /**
-     * Registers a callback to be invoked when the connection event occurred
-     * 
-     * @param event {String}
-     *        the name of event
-     * @param listener {Function}
-     *        the callback function
-     */
-    addEventListener : function(event, listener) {
-        return virt.addEventListener.apply(virt, arguments);
-    },
+/**
+ * Unregisters the callback previously set with the
+ * {@link Connection#addEventListener()}
+ * 
+ * @param event {String}
+ *        the name of event
+ * @param listener {Function}
+ *        the callback function
+ */
+Connection.prototype.removeEventListener = function(event, listener) {
+    return virt.removeEventListener.apply(virt, arguments);
+};
 
-    /**
-     * Unregisters the callback previously set with the
-     * {@link Connection#addEventListener()}
-     * 
-     * @param event {String}
-     *        the name of event
-     * @param listener {Function}
-     *        the callback function
-     */
-    removeEventListener : function(event, listener) {
-        return virt.removeEventListener.apply(virt, arguments);
-    },
+/**
+ * Computes the most feature-rich CPU which is compatible with all given host CPUs.
+ * 
+ * @param xmlCPUs {Array}
+ *        array of XML descriptions of host CPUs
+ * @param flags {Number}
+ *        bitwise-OR of virConnectBaselineCPUFlags
+ * @return {String} XML description of the computed CPU (caller frees) or
+ * {@code undefined} on error.
+ * @see VIR_CONNECT_BASELINE_CPU_EXPAND_FEATURES
+ * @see VIR_CONNECT_BASELINE_CPU_MIGRATABLE
+ */
+Connection.prototype.baselineCPU = function() {
+    return virt.virConnectBaselineCPU.apply(virt, args);
+};
 
-    /**
-     * Computes the most feature-rich CPU which is compatible with all given host CPUs.
-     * 
-     * @param xmlCPUs {Array}
-     *        array of XML descriptions of host CPUs
-     * @param flags {Number}
-     *        bitwise-OR of virConnectBaselineCPUFlags
-     * @return {String} XML description of the computed CPU (caller frees) or
-     * {@code undefined} on error.
-     * @see VIR_CONNECT_BASELINE_CPU_EXPAND_FEATURES
-     * @see VIR_CONNECT_BASELINE_CPU_MIGRATABLE
-     */
-    baselineCPU : function() {
-        return virt.virConnectBaselineCPU.apply(virt, args);
-    },
+/**
+ * This function closes the connection to the Hypervisor.
+ * 
+ * @return {Number} a positive number if at least 1 reference remains on
+ * success. The returned value should not be assumed to be the total
+ * reference count. A return of 0 implies no references remain and the
+ * connection is closed and memory has been freed.
+ */
+Connection.prototype.close = function() {
+    return virt.virConnectClose.apply(virt, args);
+};
 
-    /**
-     * This function closes the connection to the Hypervisor.
-     * 
-     * @return {Number} a positive number if at least 1 reference remains on
-     * success. The returned value should not be assumed to be the total
-     * reference count. A return of 0 implies no references remain and the
-     * connection is closed and memory has been freed.
-     */
-    close : function() {
-        return virt.virConnectClose.apply(virt, args);
-    },
+/**
+ * Compares the given CPU description with the host CPU
+ * 
+ * @param xmlDesc {String}
+ *        XML describing the CPU to compare with host CPU
+ * @param flags {Number}
+ *        bitwise-OR of virConnectCompareCPUFlags
+ * @return {Number} comparison result
+ * @see VIR_CPU_COMPARE_ERROR
+ * @see VIR_CPU_COMPARE_INCOMPATIBLE
+ * @see VIR_CPU_COMPARE_IDENTICAL
+ * @see VIR_CPU_COMPARE_SUPERSET
+ * @see VIR_CPU_COMPARE_LAST
+ */
+Connection.prototype.compareCPU = function() {
+    return virt.virConnectCompareCPU.apply(virt, args);
+};
 
-    /**
-     * Compares the given CPU description with the host CPU
-     * 
-     * @param xmlDesc {String}
-     *        XML describing the CPU to compare with host CPU
-     * @param flags {Number}
-     *        bitwise-OR of virConnectCompareCPUFlags
-     * @return {Number} comparison result
-     * @see VIR_CPU_COMPARE_ERROR
-     * @see VIR_CPU_COMPARE_INCOMPATIBLE
-     * @see VIR_CPU_COMPARE_IDENTICAL
-     * @see VIR_CPU_COMPARE_SUPERSET
-     * @see VIR_CPU_COMPARE_LAST
-     */
-    compareCPU : function() {
-        return virt.virConnectCompareCPU.apply(virt, args);
-    },
+/**
+ * Get the list of supported CPU models for a specific architecture.
+ * 
+ * @param arch {String}
+ *        architecture
+ * @param models {Array}
+ *        the CPU models supported for the specified architecture
+ * @param flags {Number}
+ *        extra flags; not used yet, so callers should always pass 0
+ * @return {Number} -1 on error, number of elements in models on success
+ */
+Connection.prototype.getCPUModelNames = function() {
+    return virt.virConnectGetCPUModelNames.apply(virt, arguments);
+};
 
-    /**
-     * Get the list of supported CPU models for a specific architecture.
-     * 
-     * @param arch {String}
-     *        architecture
-     * @param models {Array}
-     *        the CPU models supported for the specified architecture
-     * @param flags {Number}
-     *        extra flags; not used yet, so callers should always pass 0
-     * @return {Number} -1 on error, number of elements in models on success
-     */
-    getCPUModelNames : function() {
-        return virt.virConnectGetCPUModelNames.apply(virt, arguments);
-    },
+/**
+ * Get the capabilities of the hypervisor / driver.
+ * 
+ * @return {String} a XML string defining the capabilities.
+ */
+Connection.prototype.getCapabilities = function() {
+    return virt.virConnectGetCapabilities.apply(virt, arguments);
+};
 
-    /**
-     * Get the capabilities of the hypervisor / driver.
-     * 
-     * @return {String} a XML string defining the capabilities.
-     */
-    getCapabilities : function() {
-        return virt.virConnectGetCapabilities.apply(virt, arguments);
-    },
+/**
+ * This returns a system hostname on which the hypervisor is running
+ * (based on the result of the gethostname system call, but possibly
+ * expanded to a fully-qualified domain name via getaddrinfo). If we are
+ * connected to a remote system, then this returns the hostname of the
+ * remote system.
+ * 
+ * @param conn {Connection}
+ *        hypervisor connection
+ * @return {String} the hostname which must be freed by the caller
+ * @throws {Error}
+ */
+Connection.prototype.getHostname = function() {
+    return virt.virConnectGetHostname.apply(virt, arguments);
+};
 
-    /**
-     * This returns a system hostname on which the hypervisor is running
-     * (based on the result of the gethostname system call, but possibly
-     * expanded to a fully-qualified domain name via getaddrinfo). If we are
-     * connected to a remote system, then this returns the hostname of the
-     * remote system.
-     * 
-     * @param conn {Connection}
-     *        hypervisor connection
-     * @return {String} the hostname which must be freed by the caller
-     * @throws {Error}
-     */
-    getHostname : function() {
-        return virt.virConnectGetHostname.apply(virt, arguments);
-    },
+/**
+ * Returns the version of libvirt used by the daemon running on the host
+ * 
+ * @param conn {Connection}
+ *        hypervisor connection
+ * @return {Number} libvirt library version used on the connection
+ * @throws {Error}
+ */
+Connection.prototype.getLibVersion = function() {
+    return virt.virConnectGetLibVersion.apply(virt, arguments);
+};
 
-    /**
-     * Returns the version of libvirt used by the daemon running on the host
-     * 
-     * @param conn {Connection}
-     *        hypervisor connection
-     * @return {Number} libvirt library version used on the connection
-     * @throws {Error}
-     */
-    getLibVersion : function() {
-        return virt.virConnectGetLibVersion.apply(virt, arguments);
-    },
+/**
+ * Provides the maximum number of virtual CPUs supported for a guest VM of
+ * a specific type. The 'type' parameter here corresponds to the 'type'
+ * attribute in the <domain> element of the XML
+ * 
+ * @param type {String}
+ *        value of the 'type' attribute in the <domain> element
+ * @return {Number} the maximum of virtual CPU
+ * @throws {Error}
+ */
+Connection.prototype.getMaxVcpus = function() {
+    return virt.virConnectGetMaxVcpus.apply(virt, arguments);
+};
 
-    /**
-     * Provides the maximum number of virtual CPUs supported for a guest VM of
-     * a specific type. The 'type' parameter here corresponds to the 'type'
-     * attribute in the <domain> element of the XML
-     * 
-     * @param type {String}
-     *        value of the 'type' attribute in the <domain> element
-     * @return {Number} the maximum of virtual CPU
-     * @throws {Error}
-     */
-    getMaxVcpus : function() {
-        return virt.virConnectGetMaxVcpus.apply(virt, arguments);
-    },
+/**
+ * This returns the XML description of the sysinfo details for the host on
+ * which the hypervisor is running, in the same format as the <sysinfo>
+ * element of a domain XML. This information is generally available only
+ * for hypervisors running with root privileges.
+ * 
+ * @param flags {Number}
+ * @return {String} the XML string
+ * @throws {Error}
+ */
+Connection.prototype.getSysinfo = function() {
+    return virt.virConnectGetSysinfo.apply(virt, arguments);
+};
 
-    /**
-     * This returns the XML description of the sysinfo details for the host on
-     * which the hypervisor is running, in the same format as the <sysinfo>
-     * element of a domain XML. This information is generally available only
-     * for hypervisors running with root privileges.
-     * 
-     * @param flags {Number}
-     * @return {String} the XML string
-     * @throws {Error}
-     */
-    getSysinfo : function() {
-        return virt.virConnectGetSysinfo.apply(virt, arguments);
-    },
+/**
+ * Get the name of the Hypervisor driver used. This is merely the driver
+ * name; for example, both KVM and QEMU guests are serviced by the driver
+ * for the qemu:// URI, so a return of "QEMU" does not indicate whether
+ * KVM acceleration is present. For more details about the hypervisor, use
+ * {@link virConnectGetCapabilities}
+ * 
+ * @return {String} the name of the Hypervisor driver used
+ * @throws {Error}
+ */
+Connection.prototype.getType = function() {
+    return virt.virConnectGetType.apply(virt, arguments);
+};
 
-    /**
-     * Get the name of the Hypervisor driver used. This is merely the driver
-     * name; for example, both KVM and QEMU guests are serviced by the driver
-     * for the qemu:// URI, so a return of "QEMU" does not indicate whether
-     * KVM acceleration is present. For more details about the hypervisor, use
-     * {@link virConnectGetCapabilities}
-     * 
-     * @return {String} the name of the Hypervisor driver used
-     * @throws {Error}
-     */
-    getType : function() {
-        return virt.virConnectGetType.apply(virt, arguments);
-    },
+/**
+ * This returns the URI (name) of the hypervisor connection. Normally this
+ * is the same as or similar to the string passed to the
+ * {@link Connection#open()} / {@link virConnectOpenReadOnly} call, but the
+ * driver may make the URI canonical. If name is <code>null</code> was
+ * passed to {@link Connection#open()}, then the driver will return a non-NULL
+ * URI which can be used to connect to the same hypervisor later.
+ * 
+ * @return {String} the URI string
+ * @throws {Error}
+ */
+Connection.prototype.getURI = function() {
+    return virt.virConnectGetURI.apply(virt, arguments);
+};
 
-    /**
-     * This returns the URI (name) of the hypervisor connection. Normally this
-     * is the same as or similar to the string passed to the
-     * {@link Connection#open()} / {@link virConnectOpenReadOnly} call, but the
-     * driver may make the URI canonical. If name is <code>null</code> was
-     * passed to {@link Connection#open()}, then the driver will return a non-NULL
-     * URI which can be used to connect to the same hypervisor later.
-     * 
-     * @return {String} the URI string
-     * @throws {Error}
-     */
-    getURI : function() {
-        return virt.virConnectGetURI.apply(virt, arguments);
-    },
+/**
+ * Get the version level of the Hypervisor running. This may work only with
+ * hypervisor call, i.e. with privileged access to the hypervisor, not with
+ * a Read-Only connection.
+ * 
+ * @return {Number} the version of the running hypervisor
+ * @throws {Error}
+ */
+Connection.prototype.getVersion = function() {
+    return virt.virConnectGetVersion.apply(virt, arguments);
+};
 
-    /**
-     * Get the version level of the Hypervisor running. This may work only with
-     * hypervisor call, i.e. with privileged access to the hypervisor, not with
-     * a Read-Only connection.
-     * 
-     * @return {Number} the version of the running hypervisor
-     * @throws {Error}
-     */
-    getVersion : function() {
-        return virt.virConnectGetVersion.apply(virt, arguments);
-    },
+/**
+ * Determine if the connection to the hypervisor is still alive
+ * 
+ * @return {Boolean} true if alive, false if dead
+ */
+Connection.prototype.isAlive = function() {
+    return virt.virConnectIsAlive.apply(virt, arguments);
+};
 
-    /**
-     * Determine if the connection to the hypervisor is still alive
-     * 
-     * @return {Boolean} true if alive, false if dead
-     */
-    isAlive : function() {
-        return virt.virConnectIsAlive.apply(virt, arguments);
-    },
+/**
+ * Determine if the connection to the hypervisor is encrypted
+ * 
+ * @return {Boolean} true if encrypted, false if not encrypted
+ */
+Connection.prototype.isEncrypted = function() {
+    return virt.virConnectIsEncrypted.apply(virt, arguments);
+};
 
-    /**
-     * Determine if the connection to the hypervisor is encrypted
-     * 
-     * @return {Boolean} true if encrypted, false if not encrypted
-     */
-    isEncrypted : function() {
-        return virt.virConnectIsEncrypted.apply(virt, arguments);
-    },
+/**
+ * Determine if the connection to the hypervisor is secure
+ * 
+ * @return {Boolean} true if secure, false if not secure
+ */
+Connection.prototype.isSecure = function() {
+    return virt.virConnectIsSecure.apply(virt, arguments);
+};
 
-    /**
-     * Determine if the connection to the hypervisor is secure
-     * 
-     * @return {Boolean} true if secure, false if not secure
-     */
-    isSecure : function() {
-        return virt.virConnectIsSecure.apply(virt, arguments);
-    },
+/**
+ * <p>Increment the reference count on the connection. For each additional
+ * call to this method, there shall be a corresponding call to
+ * {@link Connection#close()} to release the reference count, once the caller
+ * no longer needs the reference to this object.</p>
+ * 
+ * <p>This method is typically useful for applications where multiple
+ * threads are using a connection, and it is required that the connection
+ * remain open until all threads have finished using it. ie, each new
+ * thread using a connection would increment the reference count.</p>
+ * 
+ * @throws {Error}
+ */
+Connection.prototype.ref = function() {
+    return virt.virConnectRef.apply(virt, arguments);
+};
 
-    /**
-     * <p>Increment the reference count on the connection. For each additional
-     * call to this method, there shall be a corresponding call to
-     * {@link Connection#close()} to release the reference count, once the caller
-     * no longer needs the reference to this object.</p>
-     * 
-     * <p>This method is typically useful for applications where multiple
-     * threads are using a connection, and it is required that the connection
-     * remain open until all threads have finished using it. ie, each new
-     * thread using a connection would increment the reference count.</p>
-     * 
-     * @throws {Error}
-     */
-    ref : function() {
-        return virt.virConnectRef.apply(virt, arguments);
-    },
+/**
+ * Start sending keepalive messages after <code>interval</code> seconds of
+ * inactivity and consider the connection to be broken when no response is
+ * received after <code>count</code> keepalive messages sent in a row. In
+ * other words, sending <code>count + 1</code> keepalive message results in
+ * closing the connection. When <code>interval</code> is <= 0, no keepalive
+ * messages will be sent. When <code>count</code> is 0, the connection will
+ * be automatically closed after <code>interval</code> seconds of
+ * inactivity without sending any keepalive messages.
+ * 
+ * @param interval {Number}
+ *        number of seconds of inactivity before a keepalive message is sent
+ * @param count {Number}
+ *        number of messages that can be sent in a row
+ * @return {Boolean} true on success, false when remote party doesn't
+ * support keepalive messages
+ * @throws {Error}
+ */
+Connection.prototype.setKeepAlive = function() {
+    return virt.virConnectSetKeepAlive.apply(virt, arguments);
+};
 
-    /**
-     * Start sending keepalive messages after <code>interval</code> seconds of
-     * inactivity and consider the connection to be broken when no response is
-     * received after <code>count</code> keepalive messages sent in a row. In
-     * other words, sending <code>count + 1</code> keepalive message results in
-     * closing the connection. When <code>interval</code> is <= 0, no keepalive
-     * messages will be sent. When <code>count</code> is 0, the connection will
-     * be automatically closed after <code>interval</code> seconds of
-     * inactivity without sending any keepalive messages.
-     * 
-     * @param interval {Number}
-     *        number of seconds of inactivity before a keepalive message is sent
-     * @param count {Number}
-     *        number of messages that can be sent in a row
-     * @return {Boolean} true on success, false when remote party doesn't
-     * support keepalive messages
-     * @throws {Error}
-     */
-    setKeepAlive : function() {
-        return virt.virConnectSetKeepAlive.apply(virt, arguments);
-    },
+/**
+ * Sometimes, when trying to start a new domain, it may be necessary to
+ * reserve some huge pages in the system pool which can be then allocated
+ * by the domain. This API serves that purpose.
+ * 
+ * @param allocations {Array}
+ *        An array of {@link PageAllocation}
+ * @param startCell {Number}
+ *        index of first cell to allocate pages on
+ * @param cellCount {Number}
+ *        number of consecutive cells to allocate pages on
+ * @param flags {Number}
+ *        extra flags; binary-OR of virNodeAllocPagesFlags
+ * @return the number of nodes successfully adjusted
+ * @throws {Error}
+ */
+Connection.prototype.nodeAllocPages = function(allocations, startCell, cellCount, flags) {
+    return virt.virNodeAllocPages.apply(virt, arguments);
+},
 
-    /**
-     * Sometimes, when trying to start a new domain, it may be necessary to
-     * reserve some huge pages in the system pool which can be then allocated
-     * by the domain. This API serves that purpose.
-     * 
-     * @param allocations {Array}
-     *        An array of {@link PageAllocation}
-     * @param startCell {Number}
-     *        index of first cell to allocate pages on
-     * @param cellCount {Number}
-     *        number of consecutive cells to allocate pages on
-     * @param flags {Number}
-     *        extra flags; binary-OR of virNodeAllocPagesFlags
-     * @return the number of nodes successfully adjusted
-     * @throws {Error}
-     */
-    nodeAllocPages : function(allocations, startCell, cellCount, flags) {
-        return virt.virNodeAllocPages.apply(virt, arguments);
-    },
+/**
+ * Get CPU map of host node CPUs
+ * 
+ * @return {Array} CPUs present on the host node
+ */
+Connection.prototype.nodeGetCPUMap = function() {
+    return virt.virNodeGetCPUMap.apply(virt, arguments);
+};
 
-    /**
-     * Get CPU map of host node CPUs
-     * 
-     * @return {Array} CPUs present on the host node
-     */
-    nodeGetCPUMap : function() {
-        return virt.virNodeGetCPUMap.apply(virt, arguments);
-    },
+/**
+ * This function provides individual cpu statistics of the node. If you
+ * want to get total cpu statistics of the node, you must specify
+ * {@link VIR_NODE_CPU_STATS_ALL_CPUS} to <code>cpuNum</code>.
+ * 
+ * @param cpuNum {Number}
+ *        number of node cpu
+ * @param params {Array}
+ *        an Array of {@link NodeCPUStats}
+ */
+Connection.prototype.nodeGetCPUStats = function() {
+    return virt.virNodeGetCPUStats.apply(virt, arguments);
+};
 
-    /**
-     * This function provides individual cpu statistics of the node. If you
-     * want to get total cpu statistics of the node, you must specify
-     * {@link VIR_NODE_CPU_STATS_ALL_CPUS} to <code>cpuNum</code>.
-     * 
-     * @param cpuNum {Number}
-     *        number of node cpu
-     * @param params {Array}
-     *        an Array of {@link NodeCPUStats}
-     */
-    nodeGetCPUStats : function() {
-        return virt.virNodeGetCPUStats.apply(virt, arguments);
-    },
+/**
+ * Returns the free memory in one or more NUMA cells
+ * 
+ * @param startCell {Number}
+ *        index of first cell
+ * @return the free memory
+ * @throws {Error}
+ */
+Connection.prototype.nodeGetCellsFreeMemory = function(startCell) {
+    return virt.virNodeGetCellsFreeMemory.apply(virt, arguments);
+};
 
-    /**
-     * Returns the free memory in one or more NUMA cells
-     * 
-     * @param startCell {Number}
-     *        index of first cell
-     * @return the free memory
-     * @throws {Error}
-     */
-    nodeGetCellsFreeMemory : function(startCell) {
-        return virt.virNodeGetCellsFreeMemory.apply(virt, arguments);
-    },
+/**
+ * Returns the free memory available on the Node
+ * 
+ * @return the available free memory in bytes
+ * @throws {Error}
+ */
+Connection.prototype.nodeGetFreeMemory = function() {
+    return virt.virNodeGetFreeMemory.apply(virt, arguments);
+};
 
-    /**
-     * Returns the free memory available on the Node
-     * 
-     * @return the available free memory in bytes
-     * @throws {Error}
-     */
-    nodeGetFreeMemory : function() {
-        return virt.virNodeGetFreeMemory.apply(virt, arguments);
-    },
+/**
+ * Queries the host system on free pages of specified size
+ * 
+ * @param pages {Array}
+ *        page sizes to query
+ * @param startCell {Number}
+ *        index of first cell
+ * @param cellCount {Number}
+ *        maximum number of cells
+ * @return {PageAllocation} the free pages
+ * @throws {Error}
+ */
+Connection.prototype.nodeGetFreePages = function(startCell, cellCount) {
+    return virt.virNodeGetFreePages.apply(virt, arguments);
+};
 
-    /**
-     * Queries the host system on free pages of specified size
-     * 
-     * @param pages {Array}
-     *        page sizes to query
-     * @param startCell {Number}
-     *        index of first cell
-     * @param cellCount {Number}
-     *        maximum number of cells
-     * @return {PageAllocation} the free pages
-     * @throws {Error}
-     */
-    nodeGetFreePages : function(startCell, cellCount) {
-        return virt.virNodeGetFreePages.apply(virt, arguments);
-    },
+/**
+ * Extract hardware information about the node.
+ * 
+ * @return {NodeInfo}
+ * @throws {Error}
+ */
+Connection.prototype.nodeGetInfo = function() {
+    return virt.virNodeGetInfo.apply(virt, arguments);
+};
 
-    /**
-     * Extract hardware information about the node.
-     * 
-     * @return {NodeInfo}
-     * @throws {Error}
-     */
-    nodeGetInfo : function() {
-        return virt.virNodeGetInfo.apply(virt, arguments);
-    },
-
-    /**
-     * Get all node memory parameters (parameters unsupported by OS will be
-     * omitted)
-     * 
-     * @return {TypedParameter}
-     */
-    nodeGetMemoryParameters : function() {
-        return virt.virNodeGetMemoryParameters.apply(virt, arguments);
-    },
-
+/**
+ * Get all node memory parameters (parameters unsupported by OS will be
+ * omitted)
+ * 
+ * @return {TypedParameter}
+ */
+Connection.prototype.nodeGetMemoryParameters = function() {
+    return virt.virNodeGetMemoryParameters.apply(virt, arguments);
 };
 
 for (var i in Connection.prototype) {
@@ -686,7 +680,7 @@ function TypedParameter() {
 
     /**
      * Provides version information.
-     * @return {String} the library version
+     * @return {Number} the library version
      * @throws {Error}
      */
     this.getVersion = function() {
