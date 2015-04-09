@@ -17,15 +17,14 @@
 #include <libvirt/libvirt.h>
 #include <libvirt/virterror.h>
 
-#include "connection.h"
+#include "native-class.h"
 #include "throw.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-static void __virConnectOpen(const v8::FunctionCallbackInfo<v8::Value>& args)
-{
+static void __virConnectOpen(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
     virConnectPtr conn = NULL;
@@ -43,12 +42,45 @@ static void __virConnectOpen(const v8::FunctionCallbackInfo<v8::Value>& args)
     if (NULL == conn) {
         throwVirtError(isolate);
     } else {
-        virt::Connection::NewInstance(conn, args);
+        NativeClass::NewInstance(conn, args);
     }
 }
 
-static void __virGetVersion(const v8::FunctionCallbackInfo<v8::Value>& args)
-{
+static void __virConnectClose(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    if (args.Length() < 1) {
+        throwError(isolate, "Too few arguments");
+        return;
+    }
+
+    if (!args[0]->IsObject()) {
+        throwTypeError(isolate, "Invalid arguments");
+        return;
+    }
+
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    if (NULL == native) {
+        throwError(isolate, "Invalid arguments");
+        return;
+    }
+
+    if (native->IsEmpty()) {
+        return;
+    }
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    int result = virConnectClose(conn);
+    if (-1 != result) {
+        native->Clear();
+    }
+
+    args.GetReturnValue().Set(v8::Number::New(isolate, result));
+}
+
+static void __virGetVersion(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
 
@@ -62,8 +94,7 @@ static void __virGetVersion(const v8::FunctionCallbackInfo<v8::Value>& args)
     args.GetReturnValue().Set(v8::Number::New(isolate, libVer));
 }
 
-void initialize(v8::Handle<v8::Object> exports)
-{
+void initialize(v8::Handle<v8::Object> exports) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
     if (0 != virInitialize()) {
@@ -71,10 +102,11 @@ void initialize(v8::Handle<v8::Object> exports)
         return;
     }
 
-    virt::Connection::Init(exports);
+    NativeClass::Export(exports, "Connection");
 
-    NODE_SET_METHOD(exports, "virConnectOpen", __virConnectOpen);
-    NODE_SET_METHOD(exports, "virGetVersion",  __virGetVersion);
+    NODE_SET_METHOD(exports, "virConnectClose", __virConnectClose);
+    NODE_SET_METHOD(exports, "virConnectOpen",  __virConnectOpen);
+    NODE_SET_METHOD(exports, "virGetVersion",   __virGetVersion);
 }
 
 #ifdef __cplusplus

@@ -3,8 +3,8 @@
         {
             "target_name" : "virt",
             "sources" : [
+                "src/native-class.cc",
                 "src/virt.cc",
-                "src/connection.cc",
             ],
             "include_dirs" : [
                 "/usr/local/include",
