@@ -24,6 +24,86 @@
 extern "C" {
 #endif
 
+#define CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, argc) \
+    do {                                                         \
+        if ((args).Length() < (argc)) {                          \
+            throwError((isolate), "Too few arguments");          \
+            return;                                              \
+        }                                                        \
+                                                                 \
+        if (!(args)[0]->IsObject()) {                            \
+            throwTypeError((isolate), "Invalid arguments");      \
+            return;                                              \
+        }                                                        \
+    } while (0);
+
+#define CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native) \
+    do {                                                         \
+        if (NULL == (native)) {                                  \
+            throwError((isolate), "Invalid arguments");          \
+            return;                                              \
+        }                                                        \
+                                                                 \
+        if ((native)->IsEmpty()) {                               \
+            return;                                              \
+        }                                                        \
+    } while (0);
+
+#define CHK_ARGUMENT_TYPE(isolate, arg, type)                    \
+    do {                                                         \
+        if (!arg->Is ## type()) {                                \
+            throwTypeError(isolate, "Invalid arguments");        \
+            return;                                              \
+        }                                                        \
+    } while (0);
+
+static void __virConnectBaselineCPU(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 3);
+
+    // check arg1
+    CHK_ARGUMENT_TYPE(isolate, args[1], Array);
+    v8::Local<v8::Array> cpus = v8::Local<v8::Array>::Cast(args[1]);
+    for (unsigned int i = 0, n = (*cpus)->Length(); i < n; i++) {
+        v8::Local<v8::Object> item = cpus->CloneElementAt(i);
+        CHK_ARGUMENT_TYPE(isolate, item, String);
+    }
+
+    // check arg2
+    CHK_ARGUMENT_TYPE(isolate, args[2], Uint32);
+
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    unsigned int ncpus = (*cpus)->Length();
+    unsigned int flags = args[2]->Uint32Value();
+    char **xmlCPU = new char*[ncpus];
+
+    for (unsigned int i = 0; i < ncpus; i++) {
+        v8::String::Utf8Value xml(cpus->CloneElementAt(i)->ToString());
+        xmlCPU[i] = strdup(*xml);
+    }
+
+    char *cpu = virConnectBaselineCPU(conn, const_cast<const char**>(xmlCPU), ncpus, flags);
+
+    for (unsigned int i = 0; i < ncpus; i++) {
+        delete xmlCPU[i];
+    }
+    delete xmlCPU;
+
+    if (NULL == cpu) {
+        throwVirtError(isolate);
+        return;
+    }
+
+    args.GetReturnValue().Set(v8::String::NewFromUtf8(isolate, cpu));
+    free(cpu);
+}
+
 static void __virConnectOpen(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
@@ -50,26 +130,12 @@ static void __virConnectClose(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
 
-    if (args.Length() < 1) {
-        throwError(isolate, "Too few arguments");
-        return;
-    }
-
-    if (!args[0]->IsObject()) {
-        throwTypeError(isolate, "Invalid arguments");
-        return;
-    }
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
 
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
-    if (NULL == native) {
-        throwError(isolate, "Invalid arguments");
-        return;
-    }
 
-    if (native->IsEmpty()) {
-        return;
-    }
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
 
     virConnectPtr conn = static_cast<virConnectPtr>(**native);
     int result = virConnectClose(conn);
@@ -104,9 +170,10 @@ void initialize(v8::Handle<v8::Object> exports) {
 
     NativeClass::Export(exports, "Connection");
 
-    NODE_SET_METHOD(exports, "virConnectClose", __virConnectClose);
-    NODE_SET_METHOD(exports, "virConnectOpen",  __virConnectOpen);
-    NODE_SET_METHOD(exports, "virGetVersion",   __virGetVersion);
+    NODE_SET_METHOD(exports, "virConnectBaselineCPU", __virConnectBaselineCPU);
+    NODE_SET_METHOD(exports, "virConnectClose",       __virConnectClose);
+    NODE_SET_METHOD(exports, "virConnectOpen",        __virConnectOpen);
+    NODE_SET_METHOD(exports, "virGetVersion",         __virGetVersion);
 }
 
 #ifdef __cplusplus
