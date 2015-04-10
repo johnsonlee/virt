@@ -1,1 +1,2 @@
 require('./open');
+require('./baselineCPU');

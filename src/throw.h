@@ -8,7 +8,7 @@
 #include <libvirt/virterror.h>
 
 static inline void throwError(v8::Isolate *isolate, const char *msg) {
-    isolate->ThrowException(v8::Exception::TypeError(v8::String::NewFromUtf8(isolate, msg)));
+    isolate->ThrowException(v8::Exception::Error(v8::String::NewFromUtf8(isolate, msg)));
 }
 
 static inline void throwTypeError(v8::Isolate *isolate, const char *msg) {

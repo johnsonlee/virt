@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#define TRACE() printf("%s#%d\n", __FUNCTION__, __LINE__)
+
 #define CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, argc) \
     do {                                                         \
         if ((args).Length() < (argc)) {                          \
@@ -67,7 +69,7 @@ static void __virConnectBaselineCPU(const v8::FunctionCallbackInfo<v8::Value>& a
     CHK_ARGUMENT_TYPE(isolate, args[1], Array);
     v8::Local<v8::Array> cpus = v8::Local<v8::Array>::Cast(args[1]);
     for (unsigned int i = 0, n = (*cpus)->Length(); i < n; i++) {
-        v8::Local<v8::Object> item = cpus->CloneElementAt(i);
+        v8::Local<v8::Value> item = cpus->Get(i);
         CHK_ARGUMENT_TYPE(isolate, item, String);
     }
 
@@ -84,14 +86,14 @@ static void __virConnectBaselineCPU(const v8::FunctionCallbackInfo<v8::Value>& a
     char **xmlCPU = new char*[ncpus];
 
     for (unsigned int i = 0; i < ncpus; i++) {
-        v8::String::Utf8Value xml(cpus->CloneElementAt(i)->ToString());
+        v8::String::Utf8Value xml(cpus->Get(i)->ToString());
         xmlCPU[i] = strdup(*xml);
     }
 
     char *cpu = virConnectBaselineCPU(conn, const_cast<const char**>(xmlCPU), ncpus, flags);
 
     for (unsigned int i = 0; i < ncpus; i++) {
-        delete xmlCPU[i];
+        free(xmlCPU[i]);
     }
     delete xmlCPU;
 

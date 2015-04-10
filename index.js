@@ -131,7 +131,7 @@ Connection.prototype.removeEventListener = function(event, listener) {
  * @see VIR_CONNECT_BASELINE_CPU_MIGRATABLE
  */
 Connection.prototype.baselineCPU = function() {
-    return virt.virConnectBaselineCPU.apply(virt, args);
+    return virt.virConnectBaselineCPU.apply(virt, arguments);
 };
 
 /**
@@ -143,7 +143,7 @@ Connection.prototype.baselineCPU = function() {
  * connection is closed and memory has been freed.
  */
 Connection.prototype.close = function() {
-    return virt.virConnectClose.apply(virt, args);
+    return virt.virConnectClose.apply(virt, arguments);
 };
 
 /**
@@ -161,7 +161,7 @@ Connection.prototype.close = function() {
  * @see VIR_CPU_COMPARE_LAST
  */
 Connection.prototype.compareCPU = function() {
-    return virt.virConnectCompareCPU.apply(virt, args);
+    return virt.virConnectCompareCPU.apply(virt, arguments);
 };
 
 /**
@@ -455,14 +455,16 @@ Connection.prototype.nodeGetMemoryParameters = function() {
 for (var i in Connection.prototype) {
     var m = Connection.prototype[i];
 
-    if ('function' === typeof m)
+    if ('function' !== typeof m)
         continue;
 
-    Connection.prototype[i] = function() {
-        var args = Array.prototype.slice(arguments);
-        args.unshift(this);
-        m.apply(this, args);
-    };
+    (function(k, v) {
+        Connection.prototype[k] = function() {
+            var args = Array.prototype.slice.apply(arguments);
+            args.unshift(this);
+            v.apply(this, args);
+        };
+    })(i, m);
 }
 
 /**
