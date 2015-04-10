@@ -12,11 +12,16 @@
      },
     "license" : "MIT",
     "scripts" : {
-        "preinstall" : "node-gyp configure rebuild"
+        "test" : "mocha --reporter list"
     },
     "bugs" : {
         "url" : "http://github.com/johnsonlee/virt/issues",
         "email" : "g.johnsonlee@gmail.com"
+    },
+    "dependencies" : {
+    },
+    "devDependencies" : {
+        "mocha" : "*"
     }
 }
 

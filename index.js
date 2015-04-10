@@ -462,7 +462,7 @@ for (var i in Connection.prototype) {
         Connection.prototype[k] = function() {
             var args = Array.prototype.slice.apply(arguments);
             args.unshift(this);
-            v.apply(this, args);
+            return v.apply(this, args);
         };
     })(i, m);
 }
