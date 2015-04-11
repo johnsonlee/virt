@@ -498,21 +498,26 @@ static void __virNodeGetCPUStats(const v8::FunctionCallbackInfo<v8::Value>& args
         throwVirtError(isolate);
         return;
     }
-    
-    if (nparams >= 0) {
-        virNodeCPUStatsPtr params = static_cast<virNodeCPUStatsPtr>(calloc(nparams, sizeof(virNodeCPUStats)));
-        if (0 != virNodeGetCPUStats(conn, cpuNum, params, &nparams, 0)) {
-            throwVirtError(isolate);
-        } else {
-            v8::Local<v8::Object> result = v8::Object::New(isolate);
-            for (int i = 0; i < nparams; i++) {
-                virNodeCPUStatsPtr param = params + i;
-                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value));
-            }
-            args.GetReturnValue().Set(result);
-        }
-        free(params);
+
+    if (nparams <= 0) {
+        args.GetReturnValue().Set(v8::Object::New(isolate));
+        return;
     }
+
+    virNodeCPUStatsPtr params = static_cast<virNodeCPUStatsPtr>(calloc(nparams, sizeof(virNodeCPUStats)));
+
+    if (0 != virNodeGetCPUStats(conn, cpuNum, params, &nparams, 0)) {
+        throwVirtError(isolate);
+    } else {
+        v8::Local<v8::Object> result = v8::Object::New(isolate);
+        for (int i = 0; i < nparams; i++) {
+            virNodeCPUStatsPtr param = params + i;
+            result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value));
+        }
+        args.GetReturnValue().Set(result);
+    }
+
+    free(params);
 }
 
 static void __virNodeGetCellsFreeMemory(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -529,8 +534,9 @@ static void __virNodeGetCellsFreeMemory(const v8::FunctionCallbackInfo<v8::Value
     virConnectPtr conn = static_cast<virConnectPtr>(**native);
     int start = args[1]->Int32Value();
     int max = args[2]->Int32Value();
-    unsigned long long *mems = new unsigned long long[max - start + 1];
+    unsigned long long *mems = static_cast<unsigned long long*>(calloc(max - start + 1, sizeof(unsigned long long)));
     int n = virNodeGetCellsFreeMemory(conn, mems, start, max);
+
     if (-1 == n) {
         throwVirtError(isolate);
     } else {
@@ -538,11 +544,10 @@ static void __virNodeGetCellsFreeMemory(const v8::FunctionCallbackInfo<v8::Value
         for (int i = 0; i < n; i++) {
             result->Set(i, v8::Number::New(isolate, mems[i]));
         }
-
         args.GetReturnValue().Set(result);
     }
 
-    delete mems;
+    free(mems);
 }
 
 static void __virNodeGetFreeMemory(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -593,6 +598,68 @@ static void __virNodeGetInfo(const v8::FunctionCallbackInfo<v8::Value>& args) {
     args.GetReturnValue().Set(result);
 }
 
+static void __virNodeGetMemoryParameters(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    int nparams = 0;
+    if (0 != virNodeGetMemoryParameters(conn, NULL, &nparams, 0)) {
+        throwVirtError(isolate);
+        return;
+    }
+
+    if (nparams <= 0) {
+        args.GetReturnValue().Set(v8::Object::New(isolate));
+        return;
+    }
+
+    virTypedParameterPtr params = static_cast<virTypedParameterPtr>(calloc(nparams, sizeof(virTypedParameter)));
+
+    if (0 != virNodeGetMemoryParameters(conn, params, &nparams, 0)) {
+        throwVirtError(isolate);
+    } else {
+        v8::Local<v8::Object> result = v8::Object::New(isolate);
+
+        for (int i = 0; i < nparams; i++) {
+            virTypedParameterPtr param = params + i;
+
+            switch (param->type) {
+            case VIR_TYPED_PARAM_INT:
+                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value.i));
+                break;
+            case VIR_TYPED_PARAM_UINT:
+                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value.ui));
+                break;
+            case VIR_TYPED_PARAM_LLONG:
+                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value.l));
+                break;
+            case VIR_TYPED_PARAM_ULLONG:
+                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value.ul));
+                break;
+            case VIR_TYPED_PARAM_DOUBLE:
+                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value.d));
+                break;
+            case VIR_TYPED_PARAM_BOOLEAN:
+                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Boolean::New(isolate, 0 != param->value.b));
+                break;
+            case VIR_TYPED_PARAM_STRING:
+                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::String::NewFromUtf8(isolate, param->value.s));
+                break;
+            }
+        }
+
+        args.GetReturnValue().Set(result);
+    }
+
+    free(params);
+}
+
 void initialize(v8::Handle<v8::Object> exports) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
@@ -603,30 +670,31 @@ void initialize(v8::Handle<v8::Object> exports) {
 
     NativeClass::Export(exports, "Connection");
 
-    NODE_SET_METHOD(exports, "virConnectBaselineCPU",     __virConnectBaselineCPU);
-    NODE_SET_METHOD(exports, "virConnectClose",           __virConnectClose);
-    NODE_SET_METHOD(exports, "virConnectCompareCPU",      __virConnectCompareCPU);
-    NODE_SET_METHOD(exports, "virConnectGetCapabilities", __virConnectGetCapabilities);
-    NODE_SET_METHOD(exports, "virConnectGetHostname",     __virConnectGetHostname);
-    NODE_SET_METHOD(exports, "virConnectGetLibVersion",   __virConnectGetLibVersion);
-    NODE_SET_METHOD(exports, "virConnectGetMaxVcpus",     __virConnectGetMaxVcpus);
-    NODE_SET_METHOD(exports, "virConnectGetSysinfo",      __virConnectGetSysinfo);
-    NODE_SET_METHOD(exports, "virConnectGetType",         __virConnectGetType);
-    NODE_SET_METHOD(exports, "virConnectGetURI",          __virConnectGetURI);
-    NODE_SET_METHOD(exports, "virConnectGetVersion",      __virConnectGetVersion);
-    NODE_SET_METHOD(exports, "virConnectIsAlive",         __virConnectIsAlive);
-    NODE_SET_METHOD(exports, "virConnectIsEncrypted",     __virConnectIsEncrypted);
-    NODE_SET_METHOD(exports, "virConnectIsSecure",        __virConnectIsSecure);
-    NODE_SET_METHOD(exports, "virConnectOpen",            __virConnectOpen);
-    NODE_SET_METHOD(exports, "virConnectOpenReadOnly",    __virConnectOpenReadOnly);
-    NODE_SET_METHOD(exports, "virConnectRef",             __virConnectRef);
-    NODE_SET_METHOD(exports, "virConnectSetKeepAlive",    __virConnectSetKeepAlive);
-    NODE_SET_METHOD(exports, "virNodeGetCPUMap",          __virNodeGetCPUMap);
-    NODE_SET_METHOD(exports, "virNodeGetCPUStats",        __virNodeGetCPUStats);
-    NODE_SET_METHOD(exports, "virNodeGetCellsFreeMemory", __virNodeGetCellsFreeMemory);
-    NODE_SET_METHOD(exports, "virNodeGetFreeMemory",      __virNodeGetFreeMemory);
-    NODE_SET_METHOD(exports, "virNodeGetInfo",            __virNodeGetInfo);
-    NODE_SET_METHOD(exports, "virGetVersion",             __virGetVersion);
+    NODE_SET_METHOD(exports, "virConnectBaselineCPU",      __virConnectBaselineCPU);
+    NODE_SET_METHOD(exports, "virConnectClose",            __virConnectClose);
+    NODE_SET_METHOD(exports, "virConnectCompareCPU",       __virConnectCompareCPU);
+    NODE_SET_METHOD(exports, "virConnectGetCapabilities",  __virConnectGetCapabilities);
+    NODE_SET_METHOD(exports, "virConnectGetHostname",      __virConnectGetHostname);
+    NODE_SET_METHOD(exports, "virConnectGetLibVersion",    __virConnectGetLibVersion);
+    NODE_SET_METHOD(exports, "virConnectGetMaxVcpus",      __virConnectGetMaxVcpus);
+    NODE_SET_METHOD(exports, "virConnectGetSysinfo",       __virConnectGetSysinfo);
+    NODE_SET_METHOD(exports, "virConnectGetType",          __virConnectGetType);
+    NODE_SET_METHOD(exports, "virConnectGetURI",           __virConnectGetURI);
+    NODE_SET_METHOD(exports, "virConnectGetVersion",       __virConnectGetVersion);
+    NODE_SET_METHOD(exports, "virConnectIsAlive",          __virConnectIsAlive);
+    NODE_SET_METHOD(exports, "virConnectIsEncrypted",      __virConnectIsEncrypted);
+    NODE_SET_METHOD(exports, "virConnectIsSecure",         __virConnectIsSecure);
+    NODE_SET_METHOD(exports, "virConnectOpen",             __virConnectOpen);
+    NODE_SET_METHOD(exports, "virConnectOpenReadOnly",     __virConnectOpenReadOnly);
+    NODE_SET_METHOD(exports, "virConnectRef",              __virConnectRef);
+    NODE_SET_METHOD(exports, "virConnectSetKeepAlive",     __virConnectSetKeepAlive);
+    NODE_SET_METHOD(exports, "virGetVersion",              __virGetVersion);
+    NODE_SET_METHOD(exports, "virNodeGetCPUMap",           __virNodeGetCPUMap);
+    NODE_SET_METHOD(exports, "virNodeGetCPUStats",         __virNodeGetCPUStats);
+    NODE_SET_METHOD(exports, "virNodeGetCellsFreeMemory",  __virNodeGetCellsFreeMemory);
+    NODE_SET_METHOD(exports, "virNodeGetFreeMemory",       __virNodeGetFreeMemory);
+    NODE_SET_METHOD(exports, "virNodeGetInfo",             __virNodeGetInfo);
+    NODE_SET_METHOD(exports, "virNodeGetMemoryParameters", __virNodeGetMemoryParameters);
 }
 
 #ifdef __cplusplus
