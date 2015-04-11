@@ -6,3 +6,4 @@ require('./getHostname');
 require('./getLibVersion');
 require('./getMaxVcpus');
 require('./getSysinfo');
+require('./getType');
