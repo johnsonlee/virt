@@ -457,6 +457,37 @@ static void __virGetVersion(const v8::FunctionCallbackInfo<v8::Value>& args) {
     args.GetReturnValue().Set(v8::Number::New(isolate, libVer));
 }
 
+static void __virNodeGetCellsFreeMemory(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 3);
+    CHK_ARGUMENT_TYPE(isolate, args[1], Int32);
+    CHK_ARGUMENT_TYPE(isolate, args[2], Int32);
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    int start = args[1]->Int32Value();
+    int max = args[2]->Int32Value();
+    unsigned long long *mems = new unsigned long long[max - start + 1];
+    int n = virNodeGetCellsFreeMemory(conn, mems, start, max);
+    if (-1 == n) {
+        delete mems;
+        throwVirtError(isolate);
+        return;
+    }
+
+    v8::Local<v8::Array> result = v8::Array::New(isolate, n);
+    for (int i = 0; i < n; i++) {
+        result->Set(i, v8::Number::New(isolate, mems[i]));
+    }
+
+    args.GetReturnValue().Set(result);
+    delete mems;
+}
+
 void initialize(v8::Handle<v8::Object> exports) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
@@ -485,6 +516,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virConnectOpenReadOnly",    __virConnectOpenReadOnly);
     NODE_SET_METHOD(exports, "virConnectRef",             __virConnectRef);
     NODE_SET_METHOD(exports, "virConnectSetKeepAlive",    __virConnectSetKeepAlive);
+    NODE_SET_METHOD(exports, "virNodeGetCellsFreeMemory", __virNodeGetCellsFreeMemory);
     NODE_SET_METHOD(exports, "virGetVersion",             __virGetVersion);
 }
 
