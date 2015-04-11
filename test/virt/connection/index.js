@@ -8,3 +8,4 @@ require('./getMaxVcpus');
 require('./getSysinfo');
 require('./getType');
 require('./getURI');
+require('./getVersion');
