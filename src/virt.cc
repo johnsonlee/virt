@@ -481,6 +481,40 @@ static void __virNodeGetCPUMap(const v8::FunctionCallbackInfo<v8::Value>& args) 
     }
 }
 
+static void __virNodeGetCPUStats(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 2);
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    int nparams = 0;
+    int cpuNum = args[1]->Int32Value();
+
+    if (0 != virNodeGetCPUStats(conn, cpuNum, NULL, &nparams, 0)) {
+        throwVirtError(isolate);
+        return;
+    }
+    
+    if (nparams >= 0) {
+        virNodeCPUStatsPtr params = static_cast<virNodeCPUStatsPtr>(calloc(nparams, sizeof(virNodeCPUStats)));
+        if (0 != virNodeGetCPUStats(conn, cpuNum, params, &nparams, 0)) {
+            throwVirtError(isolate);
+        } else {
+            v8::Local<v8::Object> result = v8::Object::New(isolate);
+            for (int i = 0; i < nparams; i++) {
+                virNodeCPUStatsPtr param = params + i;
+                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value));
+            }
+            args.GetReturnValue().Set(result);
+        }
+        free(params);
+    }
+}
+
 static void __virNodeGetCellsFreeMemory(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
@@ -559,6 +593,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virConnectRef",             __virConnectRef);
     NODE_SET_METHOD(exports, "virConnectSetKeepAlive",    __virConnectSetKeepAlive);
     NODE_SET_METHOD(exports, "virNodeGetCPUMap",          __virNodeGetCPUMap);
+    NODE_SET_METHOD(exports, "virNodeGetCPUStats",        __virNodeGetCPUStats);
     NODE_SET_METHOD(exports, "virNodeGetCellsFreeMemory", __virNodeGetCellsFreeMemory);
     NODE_SET_METHOD(exports, "virNodeGetFreeMemory",      __virNodeGetFreeMemory);
     NODE_SET_METHOD(exports, "virGetVersion",             __virGetVersion);

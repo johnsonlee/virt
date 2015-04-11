@@ -16,5 +16,6 @@ require('./openReadOnly');
 require('./ref');
 require('./setKeepAlive');
 require('./nodeGetCPUMap');
+require('./nodeGetCPUStats');
 require('./nodeGetCellsFreeMemory');
 require('./nodeGetFreeMemory');
