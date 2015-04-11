@@ -2,15 +2,17 @@ var should = require('should');
 var Connection = require('../../../').Connection;
 
 describe('Connection', function() {
-    describe('#nodeGetMemoryParameters', function() {
-        it('should return all node memory parameters', function() {
+    describe('#getNodeSecurityModel', function() {
+        it('should return the security model of a hypervisor', function() {
             var conn = Connection.open('vbox:///session');
             should.exist(conn);
             conn.should.be.an.instanceOf(Connection);
 
             try {
-                var params = conn.nodeGetMemoryParameters();
-                params.should.be.a.Object;
+                var model = conn.getNodeSecurityModel();
+                model.should.be.a.Object;
+                model.should.have.property('model');
+                model.should.have.property('doi');
             } finally {
                 conn.close();
             }

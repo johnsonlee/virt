@@ -707,8 +707,7 @@ static void __virNodeGetSecurityModel(const v8::FunctionCallbackInfo<v8::Value>&
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
 
-    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 2);
-    CHK_ARGUMENT_TYPE(isolate, args[1], Int32);
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);

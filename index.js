@@ -377,7 +377,7 @@ Connection.prototype.nodeAllocPages = function(allocations, startCell, cellCount
  * @return {Array} CPUs present on the host node
  * @throws {Error}
  */
-Connection.prototype.nodeGetCPUMap = function() {
+Connection.prototype.getNodeCPUMap = function() {
     return virt.virNodeGetCPUMap.apply(virt, arguments);
 };
 
@@ -391,7 +391,7 @@ Connection.prototype.nodeGetCPUMap = function() {
  * @return {Object}
  * @throws {Error}
  */
-Connection.prototype.nodeGetCPUStats = function() {
+Connection.prototype.getNodeCPUStats = function() {
     return virt.virNodeGetCPUStats.apply(virt, arguments);
 };
 
@@ -403,7 +403,7 @@ Connection.prototype.nodeGetCPUStats = function() {
  * @return the free memory
  * @throws {Error}
  */
-Connection.prototype.nodeGetCellsFreeMemory = function(startCell) {
+Connection.prototype.getNodeCellsFreeMemory = function(startCell) {
     return virt.virNodeGetCellsFreeMemory.apply(virt, arguments);
 };
 
@@ -413,7 +413,7 @@ Connection.prototype.nodeGetCellsFreeMemory = function(startCell) {
  * @return the available free memory in bytes
  * @throws {Error}
  */
-Connection.prototype.nodeGetFreeMemory = function() {
+Connection.prototype.getNodeFreeMemory = function() {
     return virt.virNodeGetFreeMemory.apply(virt, arguments);
 };
 
@@ -429,7 +429,7 @@ Connection.prototype.nodeGetFreeMemory = function() {
  * @return {PageAllocation} the free pages
  * @throws {Error}
  */
-Connection.prototype.nodeGetFreePages = function(startCell, cellCount) {
+Connection.prototype.getNodeFreePages = function(startCell, cellCount) {
     return virt.virNodeGetFreePages.apply(virt, arguments);
 };
 
@@ -439,7 +439,7 @@ Connection.prototype.nodeGetFreePages = function(startCell, cellCount) {
  * @return {NodeInfo}
  * @throws {Error}
  */
-Connection.prototype.nodeGetInfo = function() {
+Connection.prototype.getNodeInfo = function() {
     return virt.virNodeGetInfo.apply(virt, arguments);
 };
 
@@ -450,7 +450,7 @@ Connection.prototype.nodeGetInfo = function() {
  * @return {Object}
  * @throws {Error}
  */
-Connection.prototype.nodeGetMemoryParameters = function() {
+Connection.prototype.getNodeMemoryParameters = function() {
     return virt.virNodeGetMemoryParameters.apply(virt, arguments);
 };
 
@@ -462,7 +462,7 @@ Connection.prototype.nodeGetMemoryParameters = function() {
  * @return {Object}
  * @throws {Error}
  */
-Connection.prototype.nodeGetMemoryStats = function() {
+Connection.prototype.getNodeMemoryStats = function() {
     return virt.virNodeGetMemoryStats.apply(virt, arguments);
 };
 
@@ -472,7 +472,7 @@ Connection.prototype.nodeGetMemoryStats = function() {
  * @return {Object}
  * @throws {Error}
  */
-Connection.prototype.nodeGetSecurityModel = function() {
+Connection.prototype.getNodeSecurityModel = function() {
     return virt.virNodeGetSecurityModel.apply(virt, arguments);
 };
 
