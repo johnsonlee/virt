@@ -376,6 +376,28 @@ static void __virConnectOpen(const v8::FunctionCallbackInfo<v8::Value>& args) {
     }
 }
 
+static void __virConnectOpenReadOnly(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+    virConnectPtr conn = NULL;
+
+    if (0 == args.Length() || args[0]->IsUndefined() || args[0]->IsNull()) {
+        conn = virConnectOpen(NULL);
+    } else if (!args[0]->IsString()) {
+        throwTypeError(isolate, "Invalid argument");
+        return;
+    } else {
+        v8::String::Utf8Value name(args[0]->ToString());
+        conn = virConnectOpenReadOnly(*name);
+    }
+
+    if (NULL == conn) {
+        throwVirtError(isolate);
+    } else {
+        NativeClass::NewInstance(conn, args);
+    }
+}
+
 static void __virConnectClose(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
@@ -435,6 +457,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virConnectIsEncrypted",     __virConnectIsEncrypted);
     NODE_SET_METHOD(exports, "virConnectIsSecure",        __virConnectIsSecure);
     NODE_SET_METHOD(exports, "virConnectOpen",            __virConnectOpen);
+    NODE_SET_METHOD(exports, "virConnectOpenReadOnly",    __virConnectOpenReadOnly);
     NODE_SET_METHOD(exports, "virGetVersion",             __virGetVersion);
 }
 

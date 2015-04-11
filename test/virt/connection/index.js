@@ -1,4 +1,3 @@
-require('./open');
 require('./baselineCPU');
 require('./compareCPU');
 require('./getCapabilities');
@@ -12,3 +11,5 @@ require('./getVersion');
 require('./isAlive');
 require('./isEncrypted');
 require('./isSecure');
+require('./open');
+require('./openReadOnly');
