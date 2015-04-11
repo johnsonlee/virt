@@ -703,6 +703,30 @@ static void __virNodeGetMemoryStats(const v8::FunctionCallbackInfo<v8::Value>& a
     free(params);
 }
 
+static void __virNodeGetSecurityModel(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 2);
+    CHK_ARGUMENT_TYPE(isolate, args[1], Int32);
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    virSecurityModel secmodel;
+    memset(&secmodel, 0, sizeof(virSecurityModel));
+    if (0 != virNodeGetSecurityModel(conn, &secmodel)) {
+        throwVirtError(isolate);
+        return;
+    }
+
+    v8::Local<v8::Object> result = v8::Object::New(isolate);
+    result->Set(v8::String::NewFromUtf8(isolate, "model"), v8::String::NewFromUtf8(isolate, secmodel.model));
+    result->Set(v8::String::NewFromUtf8(isolate, "doi"), v8::String::NewFromUtf8(isolate, secmodel.doi));
+    args.GetReturnValue().Set(result);
+}
+
 void initialize(v8::Handle<v8::Object> exports) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
@@ -739,6 +763,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virNodeGetInfo",             __virNodeGetInfo);
     NODE_SET_METHOD(exports, "virNodeGetMemoryParameters", __virNodeGetMemoryParameters);
     NODE_SET_METHOD(exports, "virNodeGetMemoryStats",      __virNodeGetMemoryStats);
+    NODE_SET_METHOD(exports, "virNodeGetSecurityModel",    __virNodeGetSecurityModel);
 }
 
 #ifdef __cplusplus

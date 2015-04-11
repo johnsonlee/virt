@@ -1,9 +1,9 @@
 /**
- * {@link https://libvirt.org libvirt} API doc for Node
+ * API reference for virt
  * 
  * @author Johnson Lee <g.johnsonlee@gmail.com>
  * @overview
- * @version 1.0.4
+ * @version 2.0.0
  */
 
 var virt = require('./build/Release/virt.node');
@@ -464,6 +464,16 @@ Connection.prototype.nodeGetMemoryParameters = function() {
  */
 Connection.prototype.nodeGetMemoryStats = function() {
     return virt.virNodeGetMemoryStats.apply(virt, arguments);
+};
+
+/**
+ * Returns the security model of a hypervisor
+ * 
+ * @return {Object}
+ * @throws {Error}
+ */
+Connection.prototype.nodeGetSecurityModel = function() {
+    return virt.virNodeGetSecurityModel.apply(virt, arguments);
 };
 
 for (var i in Connection.prototype) {

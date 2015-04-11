@@ -22,3 +22,4 @@ require('./nodeGetFreeMemory');
 require('./nodeGetInfo');
 require('./nodeGetMemoryParameters');
 require('./nodeGetMemoryStats');
+require('./nodeGetSecurityModel');
