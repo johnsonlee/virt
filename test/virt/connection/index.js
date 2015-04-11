@@ -19,3 +19,4 @@ require('./nodeGetCPUMap');
 require('./nodeGetCPUStats');
 require('./nodeGetCellsFreeMemory');
 require('./nodeGetFreeMemory');
+require('./nodeGetInfo');
