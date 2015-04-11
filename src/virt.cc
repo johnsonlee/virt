@@ -294,6 +294,26 @@ static void __virConnectGetVersion(const v8::FunctionCallbackInfo<v8::Value>& ar
     args.GetReturnValue().Set(v8::Number::New(isolate, ver));
 }
 
+static void __virConnectIsAlive(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
+
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    int alive = virConnectIsAlive(conn);
+    if (-1 == alive) {
+        throwVirtError(isolate);
+        return;
+    }
+
+    args.GetReturnValue().Set(v8::Boolean::New(isolate, alive != 0));
+}
+
 static void __virConnectOpen(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
@@ -371,6 +391,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virConnectGetType",         __virConnectGetType);
     NODE_SET_METHOD(exports, "virConnectGetURI",          __virConnectGetURI);
     NODE_SET_METHOD(exports, "virConnectGetVersion",      __virConnectGetVersion);
+    NODE_SET_METHOD(exports, "virConnectIsAlive",         __virConnectIsAlive);
     NODE_SET_METHOD(exports, "virConnectOpen",            __virConnectOpen);
     NODE_SET_METHOD(exports, "virGetVersion",             __virGetVersion);
 }

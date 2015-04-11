@@ -9,3 +9,4 @@ require('./getSysinfo');
 require('./getType');
 require('./getURI');
 require('./getVersion');
+require('./isAlive');
