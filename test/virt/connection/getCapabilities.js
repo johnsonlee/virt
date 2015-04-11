@@ -8,11 +8,12 @@ describe('Connection', function() {
             should.exist(conn);
             conn.should.be.an.instanceOf(Connection);
 
-            var xml = conn.getCapabilities();
-            should.exist(xml);
-            xml.should.be.a.String;
-
-            conn.close();
+            try {
+                var xml = conn.getCapabilities();
+                xml.should.be.a.String;
+            } finally {
+                conn.close();
+            }
         });
     });
 });

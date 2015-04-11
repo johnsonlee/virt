@@ -8,10 +8,12 @@ describe('Connection', function() {
             should.exist(conn);
             conn.should.be.an.instanceOf(Connection);
 
-            var result = conn.compareCPU('<?xml version="1.0" encoding="utf-8"?>', 1);
-            cpu.should.be.a.Number;
-
-            conn.close();
+            try {
+                var result = conn.compareCPU('<?xml version="1.0" encoding="utf-8"?>', 1);
+                cpu.should.be.a.Number;
+            } finally {
+                conn.close();
+            }
         });
     });
 });

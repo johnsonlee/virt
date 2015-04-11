@@ -8,10 +8,12 @@ describe('Connection', function() {
             should.exist(conn);
             conn.should.be.an.instanceOf(Connection);
 
-            var cpu = conn.baselineCPU(['<?xml version="1.0" encoding="utf-8"?>'], 1);
-            cpu.should.be.a.String;
-
-            conn.close();
+            try {
+                var cpu = conn.baselineCPU(['<?xml version="1.0" encoding="utf-8"?>'], 1);
+                cpu.should.be.a.String;
+            } finally {
+                conn.close();
+            }
         });
     });
 });

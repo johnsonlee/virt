@@ -1,12 +1,20 @@
-all: rebuild test doc
+build: configure
+	@node-gyp build
 
-rebuild:
-	@node-gyp config rebuild
+rebuild: configure
+	@node-gyp rebuild
+
+configure:
+	@node-gyp configure
 
 test:
 	@mocha --reporter list
 
-doc: index.js
-	@jsdoc -d doc $^
+doc: jsdoc
+	@jsdoc -d doc index.js
 
-.PHONY: rebuild test doc
+clean:
+	@rm -rf build
+
+
+.PHONY: build test
