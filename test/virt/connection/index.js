@@ -7,3 +7,4 @@ require('./getLibVersion');
 require('./getMaxVcpus');
 require('./getSysinfo');
 require('./getType');
+require('./getURI');
