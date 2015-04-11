@@ -457,6 +457,30 @@ static void __virGetVersion(const v8::FunctionCallbackInfo<v8::Value>& args) {
     args.GetReturnValue().Set(v8::Number::New(isolate, libVer));
 }
 
+static void __virNodeGetCPUMap(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    unsigned char *cpumap = NULL;
+    int ncpu = virNodeGetCPUMap(conn, &cpumap, NULL, 0);
+    if (-1 == ncpu) {
+        throwVirtError(isolate);
+        return;
+    }
+
+    args.GetReturnValue().Set(v8::ArrayBuffer::New(isolate, cpumap, ncpu));
+
+    if (NULL != cpumap) {
+        free(cpumap);
+    }
+}
+
 static void __virNodeGetCellsFreeMemory(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
@@ -534,6 +558,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virConnectOpenReadOnly",    __virConnectOpenReadOnly);
     NODE_SET_METHOD(exports, "virConnectRef",             __virConnectRef);
     NODE_SET_METHOD(exports, "virConnectSetKeepAlive",    __virConnectSetKeepAlive);
+    NODE_SET_METHOD(exports, "virNodeGetCPUMap",          __virNodeGetCPUMap);
     NODE_SET_METHOD(exports, "virNodeGetCellsFreeMemory", __virNodeGetCellsFreeMemory);
     NODE_SET_METHOD(exports, "virNodeGetFreeMemory",      __virNodeGetFreeMemory);
     NODE_SET_METHOD(exports, "virGetVersion",             __virGetVersion);
