@@ -16,23 +16,28 @@ Please see [API doc](https://rawgit.com/johnsonlee/virt/master/doc/index.html)
 ## Example
 
 ``` js
-var virt = require('virt');
+var Connection = require('virt').Connection;
 
-var conn = virt.virConnectOpen('qemu:///system');
+var conn = Connection.open('vbox:///session');
 
-if (conn) {
-    var info = virt.virNodeGetInfo(conn);
-    var free = virt.virNodeGetFreeMemory(conn);
-    var version = virt.virConnectGetVersion(conn);
-    var libVersion = virt.virConnectGetLibVersion(conn);
+try {
+    var capabilities = conn.getCapabilities();
+    console.log(capabilities);
 
-    console.log('Info: ' + JSON.stringify(info));
-    console.log('Free Memory: ' + free);
+    var hostname = conn.getHostname();
+    console.log(hostname);
 
-    console.log('Version: ' + version);
-    console.log('Lib Version: ' + libVersion);
+    ver libVersion = conn.getLibVersion();
+    console.log(libVersion);
 
-    virt.virConnectClose();
+    var nodeInfo = conn.getNodeInfo();
+    console.log(JSON.stringify(nodeInfo));
+} catch (e) {
+    console.log(e.stack);
+} finally {
+    if (conn) {
+        conn.close();
+    }
 }
 ```
 
@@ -42,5 +47,5 @@ if (conn) {
 
 ## License
 
-Copyright (c) 2013, Johnson Lee (MIT License).
+Copyright (c) 2013-2015, Johnson Lee (MIT License).
 
