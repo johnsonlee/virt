@@ -192,6 +192,27 @@ static void __virConnectGetLibVersion(const v8::FunctionCallbackInfo<v8::Value>&
     args.GetReturnValue().Set(v8::Number::New(isolate, ver));
 }
 
+static void __virConnectGetMaxVcpus(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 2);
+
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    v8::String::Utf8Value type(args[1]->ToString());
+    int max = virConnectGetMaxVcpus(conn, *type);
+    if (-1 == max) {
+        throwVirtError(isolate);
+        return;
+    }
+
+    args.GetReturnValue().Set(v8::Number::New(isolate, max));
+}
+
 static void __virConnectOpen(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
@@ -264,6 +285,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virConnectGetCapabilities", __virConnectGetCapabilities);
     NODE_SET_METHOD(exports, "virConnectGetHostname",     __virConnectGetHostname);
     NODE_SET_METHOD(exports, "virConnectGetLibVersion",   __virConnectGetLibVersion);
+    NODE_SET_METHOD(exports, "virConnectGetMaxVcpus",     __virConnectGetMaxVcpus);
     NODE_SET_METHOD(exports, "virConnectOpen",            __virConnectOpen);
     NODE_SET_METHOD(exports, "virGetVersion",             __virGetVersion);
 }
