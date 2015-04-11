@@ -64,7 +64,6 @@ static void __virConnectBaselineCPU(const v8::FunctionCallbackInfo<v8::Value>& a
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 3);
-
     // check arg1
     CHK_ARGUMENT_TYPE(isolate, args[1], Array);
     v8::Local<v8::Array> cpus = v8::Local<v8::Array>::Cast(args[1]);
@@ -72,10 +71,8 @@ static void __virConnectBaselineCPU(const v8::FunctionCallbackInfo<v8::Value>& a
         v8::Local<v8::Value> item = cpus->Get(i);
         CHK_ARGUMENT_TYPE(isolate, item, String);
     }
-
     // check arg2
     CHK_ARGUMENT_TYPE(isolate, args[2], Uint32);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -113,7 +110,6 @@ static void __virConnectCompareCPU(const v8::FunctionCallbackInfo<v8::Value>& ar
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 3);
     CHK_ARGUMENT_TYPE(isolate, args[1], String);
     CHK_ARGUMENT_TYPE(isolate, args[2], Uint32);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -135,7 +131,6 @@ static void __virConnectGetCapabilities(const v8::FunctionCallbackInfo<v8::Value
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -156,7 +151,6 @@ static void __virConnectGetHostname(const v8::FunctionCallbackInfo<v8::Value>& a
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -177,7 +171,6 @@ static void __virConnectGetLibVersion(const v8::FunctionCallbackInfo<v8::Value>&
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -197,7 +190,6 @@ static void __virConnectGetMaxVcpus(const v8::FunctionCallbackInfo<v8::Value>& a
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 2);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -218,7 +210,6 @@ static void __virConnectGetSysinfo(const v8::FunctionCallbackInfo<v8::Value>& ar
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -239,7 +230,6 @@ static void __virConnectGetType(const v8::FunctionCallbackInfo<v8::Value>& args)
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -259,7 +249,6 @@ static void __virConnectGetURI(const v8::FunctionCallbackInfo<v8::Value>& args) 
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -279,7 +268,6 @@ static void __virConnectGetVersion(const v8::FunctionCallbackInfo<v8::Value>& ar
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -299,7 +287,6 @@ static void __virConnectIsAlive(const v8::FunctionCallbackInfo<v8::Value>& args)
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -319,7 +306,6 @@ static void __virConnectIsEncrypted(const v8::FunctionCallbackInfo<v8::Value>& a
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -339,7 +325,6 @@ static void __virConnectIsSecure(const v8::FunctionCallbackInfo<v8::Value>& args
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -398,15 +383,32 @@ static void __virConnectOpenReadOnly(const v8::FunctionCallbackInfo<v8::Value>& 
     }
 }
 
+static void __virConnectRef(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    int result = virConnectRef(conn);
+    if (-1 == result) {
+        throwVirtError(isolate);
+        return;
+    }
+
+    args.GetReturnValue().Set(v8::Boolean::New(isolate, 0 == result));
+}
+
 static void __virConnectClose(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
-
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
-
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
 
     virConnectPtr conn = static_cast<virConnectPtr>(**native);
@@ -423,7 +425,6 @@ static void __virGetVersion(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope scope(isolate);
 
     unsigned long libVer = 0;
-
     if (-1 == virGetVersion(&libVer, NULL, NULL)) {
         throwVirtError(isolate);
         return;
@@ -458,6 +459,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virConnectIsSecure",        __virConnectIsSecure);
     NODE_SET_METHOD(exports, "virConnectOpen",            __virConnectOpen);
     NODE_SET_METHOD(exports, "virConnectOpenReadOnly",    __virConnectOpenReadOnly);
+    NODE_SET_METHOD(exports, "virConnectRef",             __virConnectRef);
     NODE_SET_METHOD(exports, "virGetVersion",             __virGetVersion);
 }
 

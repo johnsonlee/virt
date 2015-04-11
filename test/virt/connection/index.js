@@ -13,3 +13,4 @@ require('./isEncrypted');
 require('./isSecure');
 require('./open');
 require('./openReadOnly');
+require('./ref');
