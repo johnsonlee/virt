@@ -14,3 +14,4 @@ require('./isSecure');
 require('./open');
 require('./openReadOnly');
 require('./ref');
+require('./setKeepAlive');
