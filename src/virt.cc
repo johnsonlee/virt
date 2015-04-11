@@ -474,18 +474,36 @@ static void __virNodeGetCellsFreeMemory(const v8::FunctionCallbackInfo<v8::Value
     unsigned long long *mems = new unsigned long long[max - start + 1];
     int n = virNodeGetCellsFreeMemory(conn, mems, start, max);
     if (-1 == n) {
-        delete mems;
+        throwVirtError(isolate);
+    } else {
+        v8::Local<v8::Array> result = v8::Array::New(isolate, n);
+        for (int i = 0; i < n; i++) {
+            result->Set(i, v8::Number::New(isolate, mems[i]));
+        }
+
+        args.GetReturnValue().Set(result);
+    }
+
+    delete mems;
+}
+
+static void __virNodeGetFreeMemory(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    unsigned long long mem = virNodeGetFreeMemory(conn);
+    if (mem <= 0) {
         throwVirtError(isolate);
         return;
     }
 
-    v8::Local<v8::Array> result = v8::Array::New(isolate, n);
-    for (int i = 0; i < n; i++) {
-        result->Set(i, v8::Number::New(isolate, mems[i]));
-    }
-
-    args.GetReturnValue().Set(result);
-    delete mems;
+    args.GetReturnValue().Set(v8::Number::New(isolate, mem));
 }
 
 void initialize(v8::Handle<v8::Object> exports) {
@@ -517,6 +535,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virConnectRef",             __virConnectRef);
     NODE_SET_METHOD(exports, "virConnectSetKeepAlive",    __virConnectSetKeepAlive);
     NODE_SET_METHOD(exports, "virNodeGetCellsFreeMemory", __virNodeGetCellsFreeMemory);
+    NODE_SET_METHOD(exports, "virNodeGetFreeMemory",      __virNodeGetFreeMemory);
     NODE_SET_METHOD(exports, "virGetVersion",             __virGetVersion);
 }
 

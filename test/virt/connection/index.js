@@ -16,3 +16,4 @@ require('./openReadOnly');
 require('./ref');
 require('./setKeepAlive');
 require('./nodeGetCellsFreeMemory');
+require('./nodeGetFreeMemory');
