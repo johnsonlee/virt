@@ -853,6 +853,38 @@ static void __virNodeSuspendForDuration(const v8::FunctionCallbackInfo<v8::Value
     }
 }
 
+static void __virConnectListInterfaces(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 1);
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    int max = virConnectNumOfDefinedInterfaces(conn);
+    if (-1 == max) {
+        throwVirtError(isolate);
+        return;
+    }
+
+    char **names = static_cast<char**>(calloc(max, sizeof(void*)));
+    int niface = virConnectListInterfaces(conn, names, max);
+    if (-1 == niface) {
+        throwVirtError(isolate);
+        return;
+    }
+
+    v8::Local<v8::Array> result = v8::Array::New(isolate, niface);
+    for (int i = 0; i < niface; i++) {
+        result->Set(i, v8::String::NewFromUtf8(isolate, names[i]));
+    }
+
+    args.GetReturnValue().Set(result);
+}
+
+
 void initialize(v8::Handle<v8::Object> exports) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
@@ -892,6 +924,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virNodeGetSecurityModel",    __virNodeGetSecurityModel);
     NODE_SET_METHOD(exports, "virNodeSetMemoryParameters", __virNodeSetMemoryParameters);
     NODE_SET_METHOD(exports, "virNodeSuspendForDuration",  __virNodeSuspendForDuration);
+    NODE_SET_METHOD(exports, "virConnectListInterfaces",   __virConnectListInterfaces);
 }
 
 #ifdef __cplusplus

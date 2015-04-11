@@ -25,3 +25,4 @@ require('./ref');
 require('./setKeepAlive');
 require('./setNodeMemoryParameters');
 require('./suspendNodeForDuration');
+require('./listInterfaces');

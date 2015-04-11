@@ -15,7 +15,6 @@ var virt = require('./build/Release/virt.node');
  * @class
  * @see {@link https://libvirt.org/html/libvirt-libvirt-host.html#virConnect}
  */
-
 var Connection = virt.Connection;
 
 /**
@@ -503,6 +502,16 @@ Connection.prototype.suspendNodeForDuration = function() {
     return virt.virNodeSuspendForDuration.apply(virt, arguments);
 };
 
+/**
+ * Returns the name of interfaces
+ * 
+ * @return {Array}
+ * @throws {Error}
+ */
+Connection.prototype.listInterfaces = function() {
+    return virt.virConnectListInterfaces.apply(virt, arguments);
+};
+
 for (var i in Connection.prototype) {
     var m = Connection.prototype[i];
 
@@ -624,59 +633,6 @@ function PageAllocation() {
 }
 
 (function() {
-
-    /**
-     * show all features
-     * @see {@link http://libvirt.org/html/libvirt-libvirt-host.html#VIR_CONNECT_BASELINE_CPU_EXPAND_FEATURES}
-     */
-    this.VIR_CONNECT_BASELINE_CPU_EXPAND_FEATURES = 1;
-
-    /**
-     * filter out non-migratable features
-     * @see {@link http://libvirt.org/html/libvirt-libvirt-host.html#VIR_CONNECT_BASELINE_CPU_MIGRATABLE}
-     */
-    this.VIR_CONNECT_BASELINE_CPU_MIGRATABLE = 2;
-
-
-    /**
-     * @see {@link http://libvirt.org/html/libvirt-libvirt-host.html#VIR_CPU_COMPARE_ERROR}
-     */
-    this.VIR_CPU_COMPARE_ERROR = -1;
-
-    /**
-     * @see {@link http://libvirt.org/html/libvirt-libvirt-host.html#VIR_CPU_COMPARE_INCOMPATIBLE}
-     */
-    this.VIR_CPU_COMPARE_INCOMPATIBLE = 0;
-
-    /**
-     * @see {@link http://libvirt.org/html/libvirt-libvirt-host.html#VIR_CPU_COMPARE_IDENTICAL}
-     */
-    this.VIR_CPU_COMPARE_IDENTICAL = 1;
-
-    /**
-     * @see {@link http://libvirt.org/html/libvirt-libvirt-host.html#VIR_CPU_COMPARE_SUPERSET}
-     */
-    this.VIR_CPU_COMPARE_SUPERSET = 2;
-
-    /**
-     *
-     * @see {@link http://libvirt.org/html/libvirt-libvirt-host.html#VIR_CPU_COMPARE_LAST}
-     */
-    this.VIR_CPU_COMPARE_LAST = 3;
-
-    /**
-     * A readonly connection
-     * 
-     * @see {@link http://libvirt.org/html/libvirt-libvirt-host.html#VIR_CONNECT_RO}
-     */
-    this.VIR_CONNECT_RO = 1;
-
-    /**
-     * Don't try to resolve URI aliases
-     * 
-     * @see {@link http://libvirt.org/html/libvirt-libvirt-host.html#VIR_CONNECT_NO_ALIASES}
-     */
-    this.VIR_CONNECT_NO_ALIASES= 2;
 
     /**
      * Provides version information.
