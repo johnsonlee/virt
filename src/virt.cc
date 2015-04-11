@@ -486,6 +486,7 @@ static void __virNodeGetCPUStats(const v8::FunctionCallbackInfo<v8::Value>& args
     v8::HandleScope scope(isolate);
 
     CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 2);
+    CHK_ARGUMENT_TYPE(isolate, args[1], Int32);
     v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
     NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
     CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
@@ -660,6 +661,48 @@ static void __virNodeGetMemoryParameters(const v8::FunctionCallbackInfo<v8::Valu
     free(params);
 }
 
+static void __virNodeGetMemoryStats(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 2);
+    CHK_ARGUMENT_TYPE(isolate, args[1], Int32);
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    int cellNum = args[1]->Int32Value();    
+    int nparams = 0;
+
+    if (0 != virNodeGetMemoryStats(conn, cellNum, NULL, &nparams, 0)) {
+        throwVirtError(isolate);
+        return;
+    }
+
+    if (nparams <= 0) {
+        args.GetReturnValue().Set(v8::Object::New(isolate));
+        return;
+    }
+
+    virNodeMemoryStatsPtr params = static_cast<virNodeMemoryStatsPtr>(calloc(nparams, sizeof(virNodeMemoryStats)));
+
+    if (0 != virNodeGetMemoryStats(conn, cellNum, params, &nparams, 0)) {
+        throwVirtError(isolate);
+    } else {
+        v8::Local<v8::Object> result = v8::Object::New(isolate);
+
+        for (int i = 0; i < nparams; i++)  {
+            virNodeMemoryStatsPtr param = params + i;
+            result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value));
+        }
+
+        args.GetReturnValue().Set(result);
+    }
+
+    free(params);
+}
+
 void initialize(v8::Handle<v8::Object> exports) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
@@ -695,6 +738,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virNodeGetFreeMemory",       __virNodeGetFreeMemory);
     NODE_SET_METHOD(exports, "virNodeGetInfo",             __virNodeGetInfo);
     NODE_SET_METHOD(exports, "virNodeGetMemoryParameters", __virNodeGetMemoryParameters);
+    NODE_SET_METHOD(exports, "virNodeGetMemoryStats",      __virNodeGetMemoryStats);
 }
 
 #ifdef __cplusplus

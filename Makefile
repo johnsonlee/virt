@@ -10,11 +10,11 @@ configure:
 test:
 	@mocha --reporter list
 
-doc: jsdoc
+doc:
 	@jsdoc -d doc index.js
 
 clean:
 	@rm -rf build
 
 
-.PHONY: build test
+.PHONY: build test doc

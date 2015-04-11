@@ -159,7 +159,7 @@ Connection.prototype.removeEventListener = function(event, listener) {
  * @see VIR_CONNECT_BASELINE_CPU_MIGRATABLE
  */
 Connection.prototype.baselineCPU = function() {
-    return virt.virConnectBaselineCPU.apply(virt, args);
+    return virt.virConnectBaselineCPU.apply(virt, arguments);
 };
 
 /**
@@ -171,7 +171,7 @@ Connection.prototype.baselineCPU = function() {
  * connection is closed and memory has been freed.
  */
 Connection.prototype.close = function() {
-    return virt.virConnectClose.apply(virt, args);
+    return virt.virConnectClose.apply(virt, arguments);
 };
 
 /**
@@ -189,7 +189,7 @@ Connection.prototype.close = function() {
  * @see VIR_CPU_COMPARE_LAST
  */
 Connection.prototype.compareCPU = function() {
-    return virt.virConnectCompareCPU.apply(virt, args);
+    return virt.virConnectCompareCPU.apply(virt, arguments);
 };
 
 /**
@@ -397,12 +397,13 @@ Connection.prototype.setKeepAlive = function() {
  */
 Connection.prototype.nodeAllocPages = function(allocations, startCell, cellCount, flags) {
     return virt.virNodeAllocPages.apply(virt, arguments);
-},
+};
 
 /**
  * Get CPU map of host node CPUs
  * 
  * @return {Array} CPUs present on the host node
+ * @throws {Error}
  */
 Connection.prototype.nodeGetCPUMap = function() {
     return virt.virNodeGetCPUMap.apply(virt, arguments);
@@ -415,8 +416,8 @@ Connection.prototype.nodeGetCPUMap = function() {
  * 
  * @param cpuNum {Number}
  *        number of node cpu
- * @param params {Array}
- *        an Array of {@link NodeCPUStats}
+ * @return {Object}
+ * @throws {Error}
  */
 Connection.prototype.nodeGetCPUStats = function() {
     return virt.virNodeGetCPUStats.apply(virt, arguments);
@@ -474,23 +475,38 @@ Connection.prototype.nodeGetInfo = function() {
  * Get all node memory parameters (parameters unsupported by OS will be
  * omitted)
  * 
- * @return {TypedParameter}
+ * @return {Object}
+ * @throws {Error}
  */
 Connection.prototype.nodeGetMemoryParameters = function() {
     return virt.virNodeGetMemoryParameters.apply(virt, arguments);
 };
 
+/**
+ * Returns the memory stats of the node
+ * 
+ * @param cellNum {Number}
+ *        number of node cell
+ * @return {Object}
+ * @throws {Error}
+ */
+Connection.prototype.nodeGetMemoryStats = function() {
+    return virt.virNodeGetMemoryStats.apply(virt, arguments);
+};
+
 for (var i in Connection.prototype) {
     var m = Connection.prototype[i];
 
-    if ('function' === typeof m)
+    if ('function' !== typeof m)
         continue;
 
-    Connection.prototype[i] = function() {
-        var args = Array.prototype.slice(arguments);
-        args.unshift(this);
-        m.apply(this, args);
-    };
+    (function(k, v) {
+        Connection.prototype[k] = function() {
+            var args = Array.prototype.slice.apply(arguments);
+            args.unshift(this);
+            return v.apply(this, args);
+        };
+    })(i, m);
 }
 
 /**
@@ -513,25 +529,6 @@ function ConnectionAuth() {
      * @type {Object}
      */
     this.userdata = null;
-
-}
-
-/**
- * Node cpu time parameter
- * 
- * @class
- */
-function NodeCPUStats() {
-
-    /**
-     * @type {String}
-     */
-    this.field = null;
-
-    /**
-     * @type {Number}
-     */
-    this.value = 0;
 
 }
 
@@ -617,40 +614,6 @@ function PageAllocation() {
 
 }
 
-/**
- * Typed parameter
- * 
- * @class
- */
-function TypedParameter() {
-
-    /**
-     * The parameter name
-     * @type {String}
-     */
-    this.field = null;
-
-    /**
-     * The parameter type
-     * @type {Number}
-     * @see VIR_TYPED_PARAM_INT
-     * @see VIR_TYPED_PARAM_UINT
-     * @see VIR_TYPED_PARAM_LLONG
-     * @see VIR_TYPED_PARAM_ULLONG
-     * @see VIR_TYPED_PARAM_DOUBLE
-     * @see VIR_TYPED_PARAM_BOOLEAN
-     * @see VIR_TYPED_PARAM_STRING
-     */
-    this.type = 0;
-
-    /**
-     * The parameter value
-     * @type {Number|Boolean|String}
-     */
-    this.value = null;
-
-}
-
 (function() {
 
     /**
@@ -729,13 +692,13 @@ function TypedParameter() {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Connection.html">Connection</a></li><li><a href="ConnectionAuth.html">ConnectionAuth</a></li><li><a href="NodeCPUStats.html">NodeCPUStats</a></li><li><a href="NodeInfo.html">NodeInfo</a></li><li><a href="PageAllocation.html">PageAllocation</a></li><li><a href="TypedParameter.html">TypedParameter</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getVersion">getVersion</a></li><li><a href="global.html#VIR_CONNECT_BASELINE_CPU_EXPAND_FEATURES">VIR_CONNECT_BASELINE_CPU_EXPAND_FEATURES</a></li><li><a href="global.html#VIR_CONNECT_BASELINE_CPU_MIGRATABLE">VIR_CONNECT_BASELINE_CPU_MIGRATABLE</a></li><li><a href="global.html#VIR_CONNECT_NO_ALIASES">VIR_CONNECT_NO_ALIASES</a></li><li><a href="global.html#VIR_CONNECT_RO">VIR_CONNECT_RO</a></li><li><a href="global.html#VIR_CPU_COMPARE_ERROR">VIR_CPU_COMPARE_ERROR</a></li><li><a href="global.html#VIR_CPU_COMPARE_IDENTICAL">VIR_CPU_COMPARE_IDENTICAL</a></li><li><a href="global.html#VIR_CPU_COMPARE_INCOMPATIBLE">VIR_CPU_COMPARE_INCOMPATIBLE</a></li><li><a href="global.html#VIR_CPU_COMPARE_LAST">VIR_CPU_COMPARE_LAST</a></li><li><a href="global.html#VIR_CPU_COMPARE_SUPERSET">VIR_CPU_COMPARE_SUPERSET</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Connection.html">Connection</a></li><li><a href="ConnectionAuth.html">ConnectionAuth</a></li><li><a href="NodeInfo.html">NodeInfo</a></li><li><a href="PageAllocation.html">PageAllocation</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getVersion">getVersion</a></li><li><a href="global.html#VIR_CONNECT_BASELINE_CPU_EXPAND_FEATURES">VIR_CONNECT_BASELINE_CPU_EXPAND_FEATURES</a></li><li><a href="global.html#VIR_CONNECT_BASELINE_CPU_MIGRATABLE">VIR_CONNECT_BASELINE_CPU_MIGRATABLE</a></li><li><a href="global.html#VIR_CONNECT_NO_ALIASES">VIR_CONNECT_NO_ALIASES</a></li><li><a href="global.html#VIR_CONNECT_RO">VIR_CONNECT_RO</a></li><li><a href="global.html#VIR_CPU_COMPARE_ERROR">VIR_CPU_COMPARE_ERROR</a></li><li><a href="global.html#VIR_CPU_COMPARE_IDENTICAL">VIR_CPU_COMPARE_IDENTICAL</a></li><li><a href="global.html#VIR_CPU_COMPARE_INCOMPATIBLE">VIR_CPU_COMPARE_INCOMPATIBLE</a></li><li><a href="global.html#VIR_CPU_COMPARE_LAST">VIR_CPU_COMPARE_LAST</a></li><li><a href="global.html#VIR_CPU_COMPARE_SUPERSET">VIR_CPU_COMPARE_SUPERSET</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta2</a> on Thu Apr 09 2015 20:51:50 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta2</a> on Sat Apr 11 2015 17:59:42 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>

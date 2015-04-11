@@ -369,12 +369,13 @@ Connection.prototype.setKeepAlive = function() {
  */
 Connection.prototype.nodeAllocPages = function(allocations, startCell, cellCount, flags) {
     return virt.virNodeAllocPages.apply(virt, arguments);
-},
+};
 
 /**
  * Get CPU map of host node CPUs
  * 
  * @return {Array} CPUs present on the host node
+ * @throws {Error}
  */
 Connection.prototype.nodeGetCPUMap = function() {
     return virt.virNodeGetCPUMap.apply(virt, arguments);
@@ -387,8 +388,8 @@ Connection.prototype.nodeGetCPUMap = function() {
  * 
  * @param cpuNum {Number}
  *        number of node cpu
- * @param params {Array}
- *        an Array of {@link NodeCPUStats}
+ * @return {Object}
+ * @throws {Error}
  */
 Connection.prototype.nodeGetCPUStats = function() {
     return virt.virNodeGetCPUStats.apply(virt, arguments);
@@ -446,10 +447,23 @@ Connection.prototype.nodeGetInfo = function() {
  * Get all node memory parameters (parameters unsupported by OS will be
  * omitted)
  * 
- * @return {TypedParameter}
+ * @return {Object}
+ * @throws {Error}
  */
 Connection.prototype.nodeGetMemoryParameters = function() {
     return virt.virNodeGetMemoryParameters.apply(virt, arguments);
+};
+
+/**
+ * Returns the memory stats of the node
+ * 
+ * @param cellNum {Number}
+ *        number of node cell
+ * @return {Object}
+ * @throws {Error}
+ */
+Connection.prototype.nodeGetMemoryStats = function() {
+    return virt.virNodeGetMemoryStats.apply(virt, arguments);
 };
 
 for (var i in Connection.prototype) {
@@ -487,25 +501,6 @@ function ConnectionAuth() {
      * @type {Object}
      */
     this.userdata = null;
-
-}
-
-/**
- * Node cpu time parameter
- * 
- * @class
- */
-function NodeCPUStats() {
-
-    /**
-     * @type {String}
-     */
-    this.field = null;
-
-    /**
-     * @type {Number}
-     */
-    this.value = 0;
 
 }
 
@@ -588,40 +583,6 @@ function PageAllocation() {
      * @type {Number}
      */
     this.pageCount = 0;
-
-}
-
-/**
- * Typed parameter
- * 
- * @class
- */
-function TypedParameter() {
-
-    /**
-     * The parameter name
-     * @type {String}
-     */
-    this.field = null;
-
-    /**
-     * The parameter type
-     * @type {Number}
-     * @see VIR_TYPED_PARAM_INT
-     * @see VIR_TYPED_PARAM_UINT
-     * @see VIR_TYPED_PARAM_LLONG
-     * @see VIR_TYPED_PARAM_ULLONG
-     * @see VIR_TYPED_PARAM_DOUBLE
-     * @see VIR_TYPED_PARAM_BOOLEAN
-     * @see VIR_TYPED_PARAM_STRING
-     */
-    this.type = 0;
-
-    /**
-     * The parameter value
-     * @type {Number|Boolean|String}
-     */
-    this.value = null;
 
 }
 

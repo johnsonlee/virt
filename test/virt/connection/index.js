@@ -21,3 +21,4 @@ require('./nodeGetCellsFreeMemory');
 require('./nodeGetFreeMemory');
 require('./nodeGetInfo');
 require('./nodeGetMemoryParameters');
+require('./nodeGetMemoryStats');
