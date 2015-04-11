@@ -625,34 +625,40 @@ static void __virNodeGetMemoryParameters(const v8::FunctionCallbackInfo<v8::Valu
     if (0 != virNodeGetMemoryParameters(conn, params, &nparams, 0)) {
         throwVirtError(isolate);
     } else {
-        v8::Local<v8::Object> result = v8::Object::New(isolate);
+        v8::Local<v8::Array> result = v8::Array::New(isolate, nparams);
 
         for (int i = 0; i < nparams; i++) {
             virTypedParameterPtr param = params + i;
+            v8::Local<v8::Object> item = v8::Object::New(isolate);
+
+            item->Set(v8::String::NewFromUtf8(isolate, "type"), v8::Number::New(isolate, param->type));
+            item->Set(v8::String::NewFromUtf8(isolate, "field"), v8::String::NewFromUtf8(isolate, param->field));
 
             switch (param->type) {
             case VIR_TYPED_PARAM_INT:
-                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value.i));
+                item->Set(v8::String::NewFromUtf8(isolate, "value"), v8::Number::New(isolate, param->value.i));
                 break;
             case VIR_TYPED_PARAM_UINT:
-                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value.ui));
+                item->Set(v8::String::NewFromUtf8(isolate, "value"), v8::Number::New(isolate, param->value.ui));
                 break;
             case VIR_TYPED_PARAM_LLONG:
-                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value.l));
+                item->Set(v8::String::NewFromUtf8(isolate, "value"), v8::Number::New(isolate, param->value.l));
                 break;
             case VIR_TYPED_PARAM_ULLONG:
-                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value.ul));
+                item->Set(v8::String::NewFromUtf8(isolate, "value"), v8::Number::New(isolate, param->value.ul));
                 break;
             case VIR_TYPED_PARAM_DOUBLE:
-                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Number::New(isolate, param->value.d));
+                item->Set(v8::String::NewFromUtf8(isolate, "value"), v8::Number::New(isolate, param->value.d));
                 break;
             case VIR_TYPED_PARAM_BOOLEAN:
-                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::Boolean::New(isolate, 0 != param->value.b));
+                item->Set(v8::String::NewFromUtf8(isolate, "value"), v8::Boolean::New(isolate, 0 != param->value.b));
                 break;
             case VIR_TYPED_PARAM_STRING:
-                result->Set(v8::String::NewFromUtf8(isolate, param->field), v8::String::NewFromUtf8(isolate, param->value.s));
+                item->Set(v8::String::NewFromUtf8(isolate, "value"), v8::String::NewFromUtf8(isolate, param->value.s));
                 break;
             }
+
+            result->Set(i, item);
         }
 
         args.GetReturnValue().Set(result);
@@ -726,6 +732,127 @@ static void __virNodeGetSecurityModel(const v8::FunctionCallbackInfo<v8::Value>&
     args.GetReturnValue().Set(result);
 }
 
+static void __virNodeSetMemoryParameters(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 2);
+    CHK_ARGUMENT_TYPE(isolate, args[1], Array);
+    v8::Local<v8::Array> arg1 = v8::Local<v8::Array>::Cast(args[1]);
+    v8::Local<v8::String> propField = v8::String::NewFromUtf8(isolate, "field");
+    v8::Local<v8::String> propType = v8::String::NewFromUtf8(isolate, "type");
+    v8::Local<v8::String> propValue = v8::String::NewFromUtf8(isolate, "value");
+    int nparams = arg1->Length();
+    for (int i = 0; i < nparams; i++) {
+        v8::Local<v8::Value> item = arg1->Get(i);
+        CHK_ARGUMENT_TYPE(isolate, item, Object);
+        v8::Local<v8::Object> obj = v8::Local<v8::Object>::Cast(item);
+
+        if (!obj->Has(propField)) {
+            throwTypeError(isolate, "Property `field` not found");
+            return;
+        }
+
+        if (!obj->Get(propField)->IsString()) {
+            throwTypeError(isolate, "Property `field` was supposed to be string");
+            return;
+        }
+
+        if (!obj->Has(propType)) {
+            throwTypeError(isolate, "Property `type` not found");
+            return;
+        }
+
+        if (!obj->Get(propType)->IsInt32()) {
+            throwTypeError(isolate, "Property `type` was supposed to be integer");
+            return;
+        }
+
+        if (!obj->Has(propValue)) {
+            throwTypeError(isolate, "Property `value` not found");
+            return;
+        }
+    }
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    virTypedParameterPtr params = static_cast<virTypedParameterPtr>(calloc(nparams, sizeof(virTypedParameter)));
+
+    for (int i = 0; i < nparams; i++) {
+        v8::Local<v8::Object> item = v8::Local<v8::Object>::Cast(arg1->Get(i));
+        virTypedParameterPtr param = params + i;
+
+        // field
+        v8::String::Utf8Value field(item->Get(propField)->ToString());
+        memcpy(param->field, *field, VIR_TYPED_PARAM_FIELD_LENGTH * sizeof(char));
+
+        // type
+        param->type = item->Get(propType)->Int32Value();
+
+        // value
+        switch (param->type) {
+        case VIR_TYPED_PARAM_INT:
+            param->value.i = item->Get(propValue)->Int32Value();
+            break;
+        case VIR_TYPED_PARAM_UINT:
+            param->value.ui = item->Get(propValue)->Uint32Value();
+            break;
+        case VIR_TYPED_PARAM_LLONG:
+            param->value.l = item->Get(propValue)->IntegerValue();
+            break;
+        case VIR_TYPED_PARAM_ULLONG:
+            param->value.ul = item->Get(propValue)->IntegerValue() & 0xffffffffffffffffL;
+            break;
+        case VIR_TYPED_PARAM_DOUBLE:
+            param->value.d = item->Get(propValue)->NumberValue();
+            break;
+        case VIR_TYPED_PARAM_BOOLEAN:
+            param->value.b = item->Get(propValue)->BooleanValue() ? 1 : 0;
+            break;
+        case VIR_TYPED_PARAM_STRING: {
+                v8::String::Utf8Value value(item->Get(propValue)->ToString());
+                param->value.s = strdup(*value);
+            }
+            break;
+        }
+    }
+
+    if (0 != virNodeSetMemoryParameters(conn, params, nparams, 0)) {
+        throwVirtError(isolate);
+    }
+
+    for (int i = 0; i < nparams; i++) {
+        virTypedParameterPtr param = params + i;
+
+        if (VIR_TYPED_PARAM_STRING == param->type && NULL != param->value.s) {
+            free(param->value.s);
+        }
+    }
+
+    free(params);
+}
+
+static void __virNodeSuspendForDuration(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::Isolate *isolate = v8::Isolate::GetCurrent();
+    v8::HandleScope scope(isolate);
+
+    CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, 3);
+    CHK_ARGUMENT_TYPE(isolate, args[1], Uint32);
+    CHK_ARGUMENT_TYPE(isolate, args[2], Uint32);
+    v8::Local<v8::Object> holder = v8::Local<v8::Object>::Cast(args[0]);
+    NativeClass *native = node::ObjectWrap::Unwrap<NativeClass>(holder);
+    CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native);
+
+    virConnectPtr conn = static_cast<virConnectPtr>(**native);
+    unsigned int target = args[1]->Uint32Value();
+    unsigned long long duration = args[2]->IntegerValue();
+    if (0 != virNodeSuspendForDuration(conn, target, duration, 0)) {
+        throwVirtError(isolate);
+    }
+}
+
 void initialize(v8::Handle<v8::Object> exports) {
     v8::Isolate *isolate = v8::Isolate::GetCurrent();
 
@@ -763,6 +890,8 @@ void initialize(v8::Handle<v8::Object> exports) {
     NODE_SET_METHOD(exports, "virNodeGetMemoryParameters", __virNodeGetMemoryParameters);
     NODE_SET_METHOD(exports, "virNodeGetMemoryStats",      __virNodeGetMemoryStats);
     NODE_SET_METHOD(exports, "virNodeGetSecurityModel",    __virNodeGetSecurityModel);
+    NODE_SET_METHOD(exports, "virNodeSetMemoryParameters", __virNodeSetMemoryParameters);
+    NODE_SET_METHOD(exports, "virNodeSuspendForDuration",  __virNodeSuspendForDuration);
 }
 
 #ifdef __cplusplus

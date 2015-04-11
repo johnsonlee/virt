@@ -895,6 +895,233 @@ resources</p>
 
     
 
+    <h4 class="name" id="allocNodePages"><span class="type-signature"></span>allocNodePages<span class="signature">(allocations, startCell, cellCount, flags)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Sometimes, when trying to start a new domain, it may be necessary to
+reserve some huge pages in the system pool which can be then allocated
+by the domain. This API serves that purpose.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>allocations</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">An array of <a href="PageAllocation.html">PageAllocation</a></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>startCell</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">index of first cell to allocate pages on</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>cellCount</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">number of consecutive cells to allocate pages on</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>flags</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">extra flags; binary-OR of virNodeAllocPagesFlags</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line370">line 370</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+
+    
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    the number of nodes successfully adjusted
+</div>
+
+
+
+    
+
+
+
+        
+            
+
+    
+
     <h4 class="name" id="baselineCPU"><span class="type-signature"></span>baselineCPU<span class="signature">(xmlCPUs, flags)</span><span class="type-signature"> &rarr; {String}</span></h4>
 
     
@@ -3069,7 +3296,7 @@ VIR_NODE_CPU_STATS_ALL_CPUS to <code>cpuNum</code>.
 
     
 
-    <h4 class="name" id="getNodeMemoryParameters"><span class="type-signature"></span>getNodeMemoryParameters<span class="signature">()</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="getNodeMemoryParameters"><span class="type-signature"></span>getNodeMemoryParameters<span class="signature">()</span><span class="type-signature"> &rarr; {Array}</span></h4>
 
     
 
@@ -3170,7 +3397,7 @@ omitted)
     </dt>
     <dd>
         
-<span class="param-type">Object</span>
+<span class="param-type">Array</span>
 
 
     </dd>
@@ -4315,233 +4542,6 @@ a Read-Only connection.
 
     
 
-    <h4 class="name" id="nodeAllocPages"><span class="type-signature"></span>nodeAllocPages<span class="signature">(allocations, startCell, cellCount, flags)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    Sometimes, when trying to start a new domain, it may be necessary to
-reserve some huge pages in the system pool which can be then allocated
-by the domain. This API serves that purpose.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>allocations</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">An array of <a href="PageAllocation.html">PageAllocation</a></td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>startCell</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">index of first cell to allocate pages on</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>cellCount</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">number of consecutive cells to allocate pages on</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>flags</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">extra flags; binary-OR of virNodeAllocPagesFlags</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="index.js.html">index.js</a>, <a href="index.js.html#line370">line 370</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-<h5>Throws:</h5>
-
-        
-
-    <div class="param-desc">
-    
-        
-<span class="param-type">Error</span>
-
-
-    
-    </div>
-
-
-    
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    the number of nodes successfully adjusted
-</div>
-
-
-
-    
-
-
-
-        
-            
-
-    
-
     <h4 class="name" id="ref"><span class="type-signature"></span>ref<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
@@ -4997,6 +4997,324 @@ support keepalive messages
 
 
         
+            
+
+    
+
+    <h4 class="name" id="setNodeMemoryParameters"><span class="type-signature"></span>setNodeMemoryParameters<span class="signature">(params)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Change all or a subset of the node memory tunables
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">scheduler parameter objects</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line486">line 486</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+
+    
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="suspendNodeForDuration"><span class="type-signature"></span>suspendNodeForDuration<span class="signature">(target, duration)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Attempt to suspend the node (host machine) for the given duration of time
+in the specified state (Suspend-to-RAM, Suspend-to-Disk or Hybrid-Suspend).
+Schedule the node's Real-Time-Clock interrupt to resume the node after the
+duration is complete
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>target</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the state to which the host must be suspended to</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>duration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the time duration in seconds for which the host has to be suspended</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="index.js.html">index.js</a>, <a href="index.js.html#line502">line 502</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+<h5>Throws:</h5>
+
+        
+
+    <div class="param-desc">
+    
+        
+<span class="param-type">Error</span>
+
+
+    
+    </div>
+
+
+    
+
+
+
+
+
+        
     
 
     
@@ -5018,7 +5336,7 @@ support keepalive messages
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta2</a> on Sat Apr 11 2015 19:53:20 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta1</a> on Sat Apr 11 2015 22:45:27 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>

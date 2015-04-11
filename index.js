@@ -367,7 +367,7 @@ Connection.prototype.setKeepAlive = function() {
  * @return the number of nodes successfully adjusted
  * @throws {Error}
  */
-Connection.prototype.nodeAllocPages = function(allocations, startCell, cellCount, flags) {
+Connection.prototype.allocNodePages = function(allocations, startCell, cellCount, flags) {
     return virt.virNodeAllocPages.apply(virt, arguments);
 };
 
@@ -447,7 +447,7 @@ Connection.prototype.getNodeInfo = function() {
  * Get all node memory parameters (parameters unsupported by OS will be
  * omitted)
  * 
- * @return {Object}
+ * @return {Array}
  * @throws {Error}
  */
 Connection.prototype.getNodeMemoryParameters = function() {
@@ -474,6 +474,33 @@ Connection.prototype.getNodeMemoryStats = function() {
  */
 Connection.prototype.getNodeSecurityModel = function() {
     return virt.virNodeGetSecurityModel.apply(virt, arguments);
+};
+
+/**
+ * Change all or a subset of the node memory tunables
+ * 
+ * @param params {Array}
+ *        scheduler parameter objects
+ * @throws {Error}
+ */
+Connection.prototype.setNodeMemoryParameters = function() {
+    return virt.virNodeSetMemoryParameters.apply(virt, arguments);
+};
+
+/**
+ * Attempt to suspend the node (host machine) for the given duration of time
+ * in the specified state (Suspend-to-RAM, Suspend-to-Disk or Hybrid-Suspend).
+ * Schedule the node's Real-Time-Clock interrupt to resume the node after the
+ * duration is complete
+ * 
+ * @param target {Number}
+ *        the state to which the host must be suspended to
+ * @param duration {Number}
+ *        the time duration in seconds for which the host has to be suspended
+ * @throws {Error}
+ */
+Connection.prototype.suspendNodeForDuration = function() {
+    return virt.virNodeSuspendForDuration.apply(virt, arguments);
 };
 
 for (var i in Connection.prototype) {

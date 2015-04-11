@@ -10,7 +10,15 @@ describe('Connection', function() {
 
             try {
                 var params = conn.getNodeMemoryParameters();
-                params.should.be.a.Object;
+                params.should.be.a.Array;
+
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+
+                    param.should.have.property('field');
+                    param.should.have.property('type');
+                    param.should.have.property('value');
+                }
             } finally {
                 conn.close();
             }
