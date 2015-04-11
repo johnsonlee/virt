@@ -10,3 +10,4 @@ require('./getType');
 require('./getURI');
 require('./getVersion');
 require('./isAlive');
+require('./isEncrypted');
