@@ -21,27 +21,6 @@ public:
         exports->Set(v8::String::NewFromUtf8(isolate, clazz), ctor);
     }
 
-    template <class S>
-    inline static void New(const v8::FunctionCallbackInfo<v8::Value>& args) {
-        v8::Isolate *isolate = v8::Isolate::GetCurrent();
-        v8::HandleScope scope(isolate);
-
-        if (args.IsConstructCall()) {
-            if (!args[0]->IsExternal()) {
-                throwError(isolate, "Unsupported operation");
-                return;
-            }
-
-            S *ptr = new S(static_cast<T>(v8::External::Cast(*args[0])->Value()));
-            ptr->Wrap(args.This());
-            args.GetReturnValue().Set(args.This());
-        } else {
-            v8::Local<v8::Value> argv[] = { args[0] };
-            v8::Local<v8::Function> ctor = v8::Local<v8::Function>::New(isolate, S::constructor);
-            args.GetReturnValue().Set(ctor->NewInstance(1, argv));
-        }
-    }
-
     template <typename S>
     inline static void NewInstance(T t, const v8::FunctionCallbackInfo<v8::Value>& args) {
         v8::Isolate *isolate = v8::Isolate::GetCurrent();
@@ -49,6 +28,14 @@ public:
         v8::Handle<v8::Value> argv[] = { v8::External::New(isolate, t) };
         v8::Local<v8::Function> ctor = v8::Local<v8::Function>::New(isolate, S::constructor);
         args.GetReturnValue().Set(ctor->NewInstance(1, argv));
+    }
+
+    template <typename S>
+    inline static v8::Local<v8::Object> NewInstance(T t) {
+        v8::Isolate *isolate = v8::Isolate::GetCurrent();
+        v8::Handle<v8::Value> argv[] = { v8::External::New(isolate, t) };
+        v8::Local<v8::Function> ctor = v8::Local<v8::Function>::New(isolate, S::constructor);
+        return ctor->NewInstance(1, argv);
     }
 
     inline Pointer(T t = NULL) : ptr(t) { }
@@ -72,6 +59,27 @@ public:
     inline void SetNull() { this->ptr = NULL; }
 
 private:
+
+    template <class S>
+    inline static void New(const v8::FunctionCallbackInfo<v8::Value>& args) {
+        v8::Isolate *isolate = v8::Isolate::GetCurrent();
+        v8::HandleScope scope(isolate);
+
+        if (args.IsConstructCall()) {
+            if (!args[0]->IsExternal()) {
+                throwError(isolate, "Unsupported operation");
+                return;
+            }
+
+            S *ptr = new S(static_cast<T>(v8::External::Cast(*args[0])->Value()));
+            ptr->Wrap(args.This());
+            args.GetReturnValue().Set(args.This());
+        } else {
+            v8::Local<v8::Value> argv[] = { args[0] };
+            v8::Local<v8::Function> ctor = v8::Local<v8::Function>::New(isolate, S::constructor);
+            args.GetReturnValue().Set(ctor->NewInstance(1, argv));
+        }
+    }
 
     T ptr;
 };
