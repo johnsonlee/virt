@@ -511,6 +511,28 @@ Connection.prototype.suspendNodeForDuration = function() {
 };
 
 /**
+ * Returns the list of interfaces
+ * 
+ * @param flags
+ *        bitwise-OR of virConnectListAllInterfacesFlags
+ * @return {Array}
+ * @throws {Error}
+ */
+Connection.prototype.listAllInterfaces = function() {
+    return virt.virConnectListAllInterfaces.apply(virt, arguments);
+};
+
+/**
+ * Returns the list of defined (inactive) physical host interfaces
+ * 
+ * @return {Array}
+ * @throws {Error}
+ */
+Connection.prototype.listDefinedInterfaces = function() {
+    return virt.virConnectListDefinedInterfaces.apply(virt, arguments);
+};
+
+/**
  * Returns the name of interfaces
  * 
  * @return {Array}
@@ -520,20 +542,187 @@ Connection.prototype.listInterfaces = function() {
     return virt.virConnectListInterfaces.apply(virt, arguments);
 };
 
-for (var i in Connection.prototype) {
-    var m = Connection.prototype[i];
+/**
+ * Returns the number of defined (inactive) interfaces on the physical host
+ * 
+ * @return {Number}
+ * @throws {Error}
+ */
+Connection.prototype.getNumberOfDefinedInterfaces = function() {
+    return virt.virConnectNumOfDefinedInterfaces.apply(virt, arguments);
+};
 
-    if ('function' !== typeof m)
-        continue;
+/**
+ * Creates a restore point
+ * 
+ * @throws {Error}
+ */
+Connection.prototype.changeInterfaceBegin = function() {
+    return virt.virInterfaceChangeBegin.apply(virt, arguments);
+};
 
-    (function(k, v) {
-        Connection.prototype[k] = function() {
-            var args = Array.prototype.slice.apply(arguments);
-            args.unshift(this);
-            return v.apply(this, args);
-        };
-    })(i, m);
-}
+/**
+ * Commits the changes made to interfaces
+ * 
+ * @throws {Error}
+ */
+Connection.prototype.changeInterfaceCommit = function() {
+    return virt.virInterfaceChangeCommit.apply(virt, arguments);
+};
+
+/**
+ * Cancels changes made to interfaces settings by restoring previous state
+ * 
+ * @throws {Error}
+ */
+Connection.prototype.changeInterfaceRollback = function() {
+    return virt.virInterfaceChangeRollback.apply(virt, arguments);
+};
+
+/**
+ * Define an inactive persistent physical host interface or modify an existing
+ * persistent one from the XML description
+ * 
+ * @param xml {String}
+ * @return {Interface}
+ * @throws {Error}
+ */
+Connection.prototype.defineInterface = function() {
+};
+
+/**
+ * Try to lookup an interface on the given hypervisor based on its name.
+ * 
+ * @param name {String}
+ *        name for the interface
+ * @return {Interface}
+ * @throws {Error}
+ */
+Connection.prototype.lookupInterfaceByName = function() {
+    return virt.virInterfaceLookupByName.apply(virt, arguments);
+};
+
+/**
+ * Try to lookup an interface on the given hypervisor based on its MAC.
+ * 
+ * @param mac {String}
+ *        the MAC for the interface (null-terminated ASCII format)
+ * @return {Interface}
+ * @throws {Error}
+ */
+Connection.prototype.lookupInterfaceByMACString = function() {
+    return virt.virInterfaceLookupByMACString.apply(virt, arguments);
+};
+
+/**
+ * Activate an interface (i.e. call "ifup")
+ * 
+ * @throws {Error}
+ */
+Interface.prototype.create = function() {
+    return virt.virInterfaceCreate.apply(virt, arguments);
+};
+
+/**
+ * Deactivate an interface (ie call "ifdown")
+ * 
+ * @throws {Error}
+ */
+Interface.prototype.destroy = function() {
+    return virt.virInterfaceDestroy.apply(virt, arguments);
+};
+
+/**
+ * Returns the connection pointer associated with an interface
+ * 
+ * @return {Connection}
+ * @throws {Error}
+ */
+Interface.prototype.getConnection = function() {
+    return virt.virInterfaceGetConnect.apply(virt, arguments);
+};
+
+/**
+ * Returns the MAC for an interface as string
+ * 
+ * @return {String}
+ * @throws {Error}
+ */
+Interface.prototype.getMACString = function() {
+    return virt.virInterfaceGetMACString.apply(virt, arguments);
+};
+
+/**
+ * Returns the public name for that interface
+ * 
+ * @return {String}
+ * @throws {Error}
+ */
+Interface.prototype.getName = function() {
+    return virt.virInterfaceGetName.apply(virt, arguments);
+};
+
+/**
+ * Returns the static configuration
+ * 
+ * @return {String}
+ * @throws {Error}
+ */
+Interface.prototype.getXMLDesc = function() {
+    return virt.virInterfaceGetXMLDesc.apply(virt, arguments);
+};
+
+/**
+ * Determine if the interface is currently running
+ * 
+ * @return {Boolean}
+ * @throws {Error}
+ */
+Interface.prototype.isActive = function() {
+    return virt.virInterfaceIsActive.apply(virt, arguments);
+};
+
+/**
+ * Increment the reference count on the interface
+ * 
+ * @throws {Error}
+ */
+Interface.prototype.ref = function() {
+    return virt.virInterfaceRef.apply(virt, arguments);
+};
+
+/**
+ * Undefine an interface, ie remove it from the config
+ * 
+ * @throws {Error}
+ */
+Interface.prototype.undefine = function() {
+    return virt.virInterfaceUndefine.apply(virt, arguments);
+};
+
+(function(prototypes) {
+    for (var i = 0; i < prototypes.length; i++) {
+        var prototype = prototypes[i];
+
+        for (var name in prototype) {
+            var member = prototype[name];
+
+            if ('function' !== typeof member)
+                continue;
+
+            (function(k, v) {
+                this[k] = function() {
+                    var args = Array.prototype.slice.apply(arguments);
+                    args.unshift(this);
+                    return v.apply(this, args);
+                };
+            }).call(prototype, name, member);
+        }
+    }
+})([
+    Connection.prototype,
+    Interface.prototype,
+]);
 
 /**
  * @see {@link https://libvirt.org/html/libvirt-libvirt-host.html#virConnectAuth}
