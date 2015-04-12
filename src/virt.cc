@@ -18,6 +18,7 @@
 #include <libvirt/virterror.h>
 
 #include "connection.h"
+#include "domain.h"
 #include "interface.h"
 
 #ifdef __cplusplus
@@ -867,6 +868,7 @@ void initialize(v8::Handle<v8::Object> exports) {
     }
 
     Connection::Export<Connection>(exports, "Connection");
+    Domain::Export<Domain>(exports, "Domain");
     Interface::Export<Interface>(exports, "Interface");
 
     NODE_SET_METHOD(exports, "virConnectBaselineCPU",      __virConnectBaselineCPU);

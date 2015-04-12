@@ -54,6 +54,14 @@ var Connection = virt.Connection;
 var Interface = virt.Interface;
 
 /**
+ * Domain
+ * 
+ * @class
+ * @see {@link http://libvirt.org/html/libvirt-libvirt-domain.html#virDomain}
+ */
+var Domain = virt.Domain;
+
+/**
  * &lt;p>This function should be called first to get a connection to the
  * Hypervisor and xen store&lt;/p>
  * 
@@ -615,7 +623,46 @@ Connection.prototype.changeInterfaceRollback = function() {
  * @return {Interface}
  * @throws {Error}
  */
-Connection.prototype.defineInterface = function() {
+Connection.prototype.defineInterfaceXML = function() {
+    return virt.virInterfaceDefineXML.apply(virt, arguments);
+};
+
+/**
+ * Try to find a domain based on the hypervisor ID number Note that this won't
+ * work for inactive domains which have an ID of -1, in that case a lookup
+ * based on the Name or UUId need to be done instead.
+ * 
+ * @param id {Number}
+ *        the domain ID number
+ * @return {Domain}
+ * @throws {Error}
+ */
+Connection.prototype.lookupDomainById = function() {
+    return virt.virDomainLookupByID.apply(virt, arguments);
+};
+
+/**
+ * Try to lookup a domain on the given hypervisor based on its name.
+ * 
+ * @param name {String}
+ *        the domain name
+ * @return {Domain}
+ * @throws {Error}
+ */
+Connection.prototype.lookupDomainByName = function() {
+    return virt.virDomainLookupByName.apply(virt, arguments);
+};
+
+/**
+ * Try to lookup a domain on the given hypervisor based on its UUID.
+ * 
+ * @param uuid {String}
+ *        the UUID string for the domain
+ * @return {Domain}
+ * @throws {Error}
+ */
+Connection.prototype.lookupDomainByUUID = function() {
+    return virt.virDomainLookupByUUIDString.apply(virt, arguments);
 };
 
 /**
@@ -640,6 +687,1094 @@ Connection.prototype.lookupInterfaceByName = function() {
  */
 Connection.prototype.lookupInterfaceByMACString = function() {
     return virt.virInterfaceLookupByMACString.apply(virt, arguments);
+};
+
+/**
+ * Returns a possibly-filtered list of all domains
+ * 
+ * @param flags {Number}
+ * @return {Array}
+ * @throws {Error}
+ */
+Connection.prototype.listAllDomains = function() {
+    return virt.virConnectListAllDomains.apply(virt, arguments);
+};
+
+/**
+ * Returns the defined but inactive domains
+ *
+ * @return {Array}
+ * @throws {Error}
+ */
+Connection.prototype.listDefinedDomains = function() {
+    return virt.virConnectListDefinedDomains.apply(virt, arguments);
+};
+
+/**
+ * Returns the list of active domains
+ * 
+ * @return {Array}
+ * @throws {Error}
+ */
+Connection.prototype.listDomains = function() {
+    return virt.virConnectListDomains.apply(virt, arguments);
+};
+
+/**
+ * Returns he number of defined but inactive domains
+ * 
+ * @return {Number}
+ * @throws {Error}
+ */
+Connection.prototype.getNumberOfDefinedDomains = function() {
+    return virt.virConnectNumOfDefinedDomains.apply(virt, arguments);
+};
+
+/**
+ * Returns the number of active domains
+ * 
+ * @return {Number}
+ * @throws {Error}
+ */
+Connection.prototype.getNumberOfDomains = function() {
+    return virt.virConnectNumOfDomains.apply(virt, arguments);
+};
+
+/**
+ * Launch a new guest domain, based on an XML description
+ * 
+ * @param xml {String}
+ *        string containing an XML description of the domain
+ * @param flags {Number}
+ *        bitwise-OR of supported virDomainCreateFlags
+ * @return {Domain}
+ * @throws {Error}
+ */
+Connection.prototype.createDomainXML = function() {
+    return virt.virDomainCreateXML.apply(virt, arguments);
+};
+
+/**
+ * Launch a new guest domain, based on an XML description
+ * 
+ * @param xml {String}
+ *        string containing an XML description of the domain
+ * @param files {Array}
+ *        list of file descriptors
+ * @param flags {Number}
+ *        bitwise-OR of supported virDomainCreateFlags
+ * @return {Domain}
+ * @throws {Error}
+ */
+Connection.prototype.createDomainXMLWithFiles = function() {
+    return virt.virDomainCreateXMLWithFiles.apply(virt, arguments);
+};
+
+/**
+ * 
+ * Define a domain, but does not start it. This definition is persistent,
+ * until explicitly undefined with {@link Domain#undefine()}
+ * 
+ * @param xml {String}
+ *        the XML description for the domain, preferably in UTF-8
+ * @return {Domain}
+ * @throws {Error}
+ */
+Connection.prototype.defineDomainXML = function() {
+    return virt.virDomainDefineXML.apply(virt, arguments);
+};
+
+/**
+ * 
+ * Define a domain, but does not start it. This definition is persistent,
+ * until explicitly undefined with {@link Domain#undefine()}
+ * 
+ * @param xml {String}
+ *        the XML description for the domain, preferably in UTF-8
+ * @param flags {Number}
+ *        bitwise OR of the virDomainDefineFlags constants
+ * @return {Domain}
+ * @throws {Error}
+ */
+Connection.prototype.defineDomainXMLFlags = function() {
+    return virt.virDomainDefineXMLFlags.apply(virt, arguments);
+};
+
+/**
+ * Create a virtual device attachment to backend
+ * 
+ * @param xml {String}
+ *        XML description of one device
+ * @throws {Error}
+ */
+Domain.prototype.attachDevice = function() {
+    return virt.virDomainAttachDevice.apply(virt, arguments);
+};
+
+/**
+ * Commit changes that were made to temporary top-level files within a disk
+ * image backing file chain into a lower-level base file
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @param base {String}
+ *        path to backing file to merge into, or device shorthand
+ * @param top {String}
+ *        path to file within backing chain that contains data to be merged,
+ *        or device shorthand
+ * @param bandWidth {Number}
+ *        specify bandwidth limit
+ * @param flags {Number}
+ *        bitwise-OR of virDomainBlockCommitFlags
+ * @throws {Error}
+ */
+Domain.prototype.commitBlock = function() {
+    return virt.virDomainBlockCommit.apply(virt, arguments);
+};
+
+/**
+ * Copy the guest-visible contents of a disk image to a new file described by
+ * the specified xml
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @param xml {String}
+ *        XML description of the copy destination
+ * @param params {Object}
+ *        block copy parameter objects
+ * @param flags {Number}
+ *        bitwise-OR of virDomainBlockCopyFlags
+ * @throws {Error}
+ */
+Domain.prototype.copyBlock = function() {
+    return virt.virDomainBlockCopy.apply(virt, arguments);
+};
+
+/**
+ * Cancel the active block job on the given disk.
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @param flags {Number}
+ *        bitwise-OR of virDomainBlockJobAbortFlags
+ * @throws {Error}
+ */
+Domain.prototype.abortBlockJob = function() {
+    return virt.virDomainBlockJobAbort.apply(virt, arguments);
+};
+
+/**
+ * Set the maximimum allowable bandwidth that a block job may consume
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @param bandWidth {Number}
+ *        specify bandwidth limit
+ * @param flags {Number}
+ *        bitwise-OR of virDomainBlockJobSetSpeedFlags
+ * @throws {Error}
+ */
+Domain.prototype.setBlockJobSpeed = function() {
+    return virt.virDomainBlockJobSetSpeed.apply(virt, arguments);
+};
+
+/**
+ * read the contents of a domain's disk device
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @param offset {Number}
+ *        offset within block device
+ * @param size {Number}
+ *        size to read
+ * @return {ArrayBuffer}
+ * @throws {Error}
+ */
+Domain.prototype.peekBlock = function() {
+    return virt.virDomainBlockPeek.apply(virt, arguments);
+};
+
+/**
+ * Populate a disk image with data from its backing image
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @param bandWidth {Number}
+ *        specify bandwidth limit
+ * @param flags {Number}
+ *        bitwise-OR of virDomainBlockPullFlags
+ * @throws {Error}
+ */
+Domain.prototype.pullBlock = function() {
+    return virt.virDomainBlockPull.apply(virt, arguments);
+};
+
+
+/**
+ * Populate a disk image with data from its backing image chain, and setting
+ * the backing image to base
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @param base {String}
+ *        path to backing file to keep, or device shorthand, or null for no
+ *        backing file
+ * @param bandWidth {Number}
+ *        specify bandwidth limit
+ * @param flags {Number}
+ *        bitwise-OR of virDomainBlockRebaseFlags
+ * @throws {Error}
+ */
+Domain.prototype.rebaseBlock = function() {
+    return virt.virDomainBlockRebase.apply(virt, arguments);
+};
+
+/**
+ * Resize a block device of domain while the domain is running
+ * 
+ * @param disk {String}
+ *        path to the block image, or shorthand
+ * @param size {Number}
+ *        new size of the block image
+ * @param flags {Number}
+ *        bitwise-OR of virDomainBlockResizeFlags
+ * @throws {Error}
+ */
+Domain.prototype.resizeBlock = function() {
+    return virt.virDomainBlockResize.apply(virt, arguments);
+};
+
+/**
+ * Returns block device (disk) stats for block devices attached to the domain
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @return {Object}
+ * @throws {Error}
+ */
+Domain.prototype.getBlockStats = function() {
+    return virt.virDomainBlockStats.apply(virt, arguments);
+};
+
+/**
+ * Returns block stats parameters for block devices attached to the domain
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @param flags {Number}
+ *        bitwise-OR of virTypedParameterFlags
+ * @return {Array}
+ */
+Domain.prototype.getBlockStatsParameters = function() {
+    return virt.virDomainBlockStatsFlags.apply(virt, arguments);
+};
+
+/**
+ * Dump the core of a domain on a given file for analysis
+ * 
+ * @param to {String}
+ *        path for the core file
+ * @param flags {Number}
+ *        bitwise-OR of virDomainCoreDumpFlags
+ * @throws {Error}
+ */
+Domain.prototype.coreDump = function() {
+    return virt.virDomainCoreDump.apply(virt, arguments);
+};
+
+/**
+ * Dump the core of a domain on a given file for analysis
+ * 
+ * @param to {String}
+ *        path for the core file
+ * @param format {Number}
+ *        format of domain memory's dump
+ * @param flags {Number}
+ *        bitwise-OR of virDomainCoreDumpFlags
+ * @throws {Error}
+ */
+Domain.prototype.coreDumpWithFormat = function() {
+    return virt.virDomainCoreDumpWithFormat.apply(virt, arguments);
+};
+
+/**
+ * Launch a defined domain
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of supported virDomainCreateFlags
+ * @throws {Error}
+ */
+Domain.prototype.create = function() {
+    return virt.virDomainCreateWithFlags.apply(virt, arguments);
+};
+
+/**
+ * Launch a defined domain
+ * 
+ * @param files {Array}
+ *        list of file descriptors
+ * @param flags {Number}
+ *        bitwise-OR of supported virDomainCreateFlags
+ * @throws {Error}
+ */
+Domain.prototype.createWithFiles = function() {
+    return virt.virDomainCreateWithFiles.apply(virt, arguments);
+};
+
+/**
+ * Destroy the domain object. The running instance is shutdown if not down
+ * already and all resources used by it are given back to the hypervisor.
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainDestroyFlagsValues
+ * @throws {Error}
+ */
+Domain.prototype.destroy = function() {
+    return virt.virDomainDestroyFlags.apply(virt, arguments);
+};
+
+/**
+ * Detach a virtual device from a domain, using the flags parameter to control
+ * how the device is detached
+ * 
+ * @param xml {String}
+ *        XML description of one device
+ * @param flags {Number}
+ *        bitwise-OR of virDomainDeviceModifyFlags
+ * @throws {Error}
+ */
+Domain.prototype.detachDevice = function() {
+    return virt.virDomainDetachDeviceFlags.apply(virt, arguments);
+};
+
+/**
+ * Freeze specified filesystems within the guest
+ * 
+ * @param mnts {Array}
+ *        list of mount points to be frozen
+ * @return {Number} the number of frozen filesystems
+ * @throws {Error}
+ */
+Domain.prototype.freezeFileSystem = function() {
+    return virt.virDomainFSFreeze.apply(virt, arguments);
+};
+
+/**
+ * Thaw specified filesystems within the guest
+ * 
+ * @param mnts {Array}
+ *        list of mount points to be thaw
+ * @return {Number} the number of thawed filesystems
+ * @throws {Error}
+ */
+Domain.prototype.thawFileSystem = function() {
+    return virt.virDomainFSThaw.apply(virt, arguments);
+};
+
+/**
+ * Calls FITRIM within the guest
+ * 
+ * @param mnt {String}
+ *        which mount point to trim
+ * @param min {Number}
+ *        Minimum contiguous free range to discard in bytes
+ * @throws {Error}
+ */
+Domain.prototype.trimFileSystem = function() {
+    return virt.virDomainFSTrim.apply(virt, arguments);
+};
+
+/**
+ * Returns a boolean value indicating whether the domain configured to be
+ * automatically started when the host machine boots
+ * 
+ * @return {Boolean}
+ * @throws {Error}
+ */
+Domain.prototype.getAutostart = function() {
+    return virt.virDomainGetAutostart.apply(virt, arguments);
+};
+
+/**
+ * Returns all blkio parameters
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainModificationImpact and virTypedParameterFlags
+ * @return {Array} blkio parameter object
+ * @throws {Error}
+ */
+Domain.prototype.getBlkioParameters = function() {
+    return virt.virDomainGetBlkioParameters.apply(virt, arguments);
+};
+
+/**
+ * Returns information about a domain's block device.
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @return {Object}
+ * @throws {Error}
+ */
+Domain.prototype.getBlockInfo = function() {
+    return virt.virDomainGetBlockInfo.apply(virt, arguments);
+};
+
+/**
+ * Returns all block IO tunable parameters for a given device
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @param flags {Number}
+ *        bitwise-OR of virDomainModificationImpact and virTypedParameterFlags
+ * @return {Array} blkio parameter objects
+ * @throws {Error}
+ */
+Domain.prototype.getBlockIoTune = function() {
+    return virt.virDomainGetBlockIoTune.apply(virt, arguments);
+};
+
+/**
+ * Request block job information for the given disk
+ * 
+ * @param disk {String}
+ *        path to the block device, or device shorthand
+ * @param flags {Number}
+ *        bitwise-OR of virDomainBlockJobInfoFlags
+ * @return {Object} block job info
+ * @throws {Error}
+ */
+Domain.prototype.getBlockJobInfo = function() {
+    return virt.virDomainGetBlockJobInfo.apply(virt, arguments);
+};
+
+/**
+ * Returns statistics relating to CPU usage attributable to a single domain
+ * 
+ * @param start {Number}
+ *        which cpu to start with, or -1 for summary
+ * @param ncpus {Number}
+ *        how many cpus to query
+ * @param flags {Number}
+ *        bitwise-OR of virTypedParameterFlags
+ * @return {Array} typed parameter objects
+ * @throws {Error}
+ */
+Domain.prototype.getCPUStats = function() {
+    return virt.virDomainGetCPUStats.apply(virt, arguments);
+};
+
+/**
+ * Returns the connection pointer associated with a domain. The reference
+ * counter on the connection is not increased by this call
+ *
+ * @return {Connection}
+ * @throws {Error}
+ */
+Domain.prototype.getConnection = function() {
+    return virt.virDomainGetConnect.apply(virt, arguments);
+};
+
+/**
+ * Returns details about current state of control interface to a domain.
+ * 
+ * @return {Object} control info
+ * @throws {Error}
+ */
+Domain.prototype.getControlInfo = function() {
+    return virt.virDomainGetControlInfo.apply(virt, arguments);
+};
+
+/**
+ * Returns all I/O errors that encountered with disks. Disks with no error will
+ * not be returned
+ */
+Domain.prototype.getDiskErrors = function() {
+    return virt.virDomainGetDiskErrors.apply(virt, arguments);
+};
+
+/**
+ * Query the CPU affinity setting of all emulator threads of domain, store it
+ * in cpumap.
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainModificationImpact Must not be
+ *        VIR_DOMAIN_AFFECT_LIVE and VIR_DOMAIN_AFFECT_CONFIG concurrently.
+ * @return {Array}
+ * @throws {Error}
+ */
+Domain.prototype.getEmulatorPinInfo = function() {
+    return virt.virDomainGetEmulatorPinInfo.apply(virt, arguments);
+};
+
+/**
+ * Return a list of mapping information for each mounted file systems within
+ * the specified guest and the disks
+ * 
+ * @return {Array} mount points information
+ * @throws {Error}
+ */
+Domain.prototype.getFileSystemInfo = function() {
+    return virt.virDomainGetFSInfo.apply(virt, arguments);
+};
+
+/**
+ * Returns the hostname for that domain.
+ * 
+ * @return {String}
+ * @throws {Error}
+ */
+Domain.prototype.getHostname = function() {
+    return virt.virDomainGetHostname.apply(virt, arguments);
+};
+
+/**
+ * Returns he hypervisor ID number for the domain
+ */
+Domain.prototype.getId = function() {
+    return virt.virDomainGetID.apply(virt, arguments);
+};
+
+/**
+ * Returns IOThreads of an active domain including the cpumap information to
+ * determine on which CPU the IOThread has affinity to run
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainModificationImpact Must not be
+ *        VIR_DOMAIN_AFFECT_LIVE and VIR_DOMAIN_AFFECT_CONFIG concurrently.
+ * @return {Object} IOThread info
+ * @throws {Error}
+ */
+Domain.prototype.getIOThreadInfo = function() {
+    return virt.virDomainGetIOThreadInfo.apply(virt, arguments);
+};
+
+/**
+ * Returns all interface parameters
+ * 
+ * @param device {String}
+ *        the interface name or mac address
+ * @param flags {Number}
+ *        bitwise-OR of virDomainModificationImpact and virTypedParameterFlags
+ * @return {Array} typed parameters
+ * @throws {Error}
+ */
+Domain.prototype.getInterfaceParameters = function() {
+    return virt.virDomainGetInterfaceParameters.apply(virt, arguments);
+};
+
+/**
+ * Returns information about progress of a background job on a domain.
+ * Will return an error if the domain is not active.
+ * 
+ * @return {Object} job information
+ * @throws {Error}
+ */
+Domain.prototype.getJobInfo = function() {
+    return virt.virDomainGetJobInfo.apply(virt, arguments);
+};
+
+/**
+ * Returns information about progress of a background job on a domain
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainGetJobStatsFlags
+ * @return {Array}
+ */
+Domain.prototype.getJobStats = function() {
+    return virt.virDomainGetJobStats.apply(virt, arguments);
+};
+
+/**
+ * Returns the maximum amount of physical memory allocated to a domain
+ * 
+ * @return {Number} the memory size in kibibytes (blocks of 1024 bytes)
+ * @throws {Error}
+ */
+Domain.prototype.getMaxMemory = function() {
+    return virt.virDomainGetMaxMemory.apply(virt, arguments);
+};
+
+/**
+ * Returns the maximum number of virtual CPUs supported for the guest VM
+ * 
+ * @return {Number} the maximum of virtual CPU
+ * @throws {Error}
+ */
+Domain.prototype.getMaxVcpus = function() {
+    return virt.virDomainGetMaxVcpus.apply(virt, arguments);
+};
+
+/**
+ * Returns all memory parameters
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainModificationImpact and virTypedParameterFlags
+ * @return {Array} typed parameters
+ * @throws {Error}
+ */
+Domain.prototype.getMemoryParameters = function() {
+    return virt.virDomainGetMemoryParameters.apply(virt, arguments);
+};
+
+/**
+ * Returns the appropriate domain element
+ * 
+ * @param type {Number}
+ *        type of metadata, from virDomainMetadataType
+ * @param uri {String}
+ *        XML namespace identifier
+ * @param flags {Number}
+ *        bitwise-OR of virDomainModificationImpact
+ * @return {String} the metadata string
+ * @throws {Error}
+ */
+Domain.prototype.getMetadata = function() {
+    return virt.virDomainGetMetadata.apply(virt, arguments);
+};
+
+/**
+ * Returns the public name for that domain
+ * 
+ * @return {String} domain name
+ */
+Domain.prototype.getName = function() {
+    return virt.virDomainGetName.apply(virt, arguments);
+};
+
+/**
+ * Returns all numa parameters
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainModificationImpact and virTypedParameterFlags
+ * @return {Array} typed parameters
+ * @throws {Error}
+ */
+Domain.prototype.getNumaParameters = function() {
+    return virt.virDomainGetNumaParameters.apply(virt, arguments);
+};
+
+/**
+ * Returns the type of domain operation system.
+ * 
+ * @return {String}
+ * @throws {Error}
+ */
+Domain.prototype.getOSType = function() {
+    return virt.virDomainGetOSType.apply(virt, arguments);
+};
+
+/**
+ * Returns all scheduler parameters
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainModificationImpact and virTypedParameterFlags
+ * @return {Array} typed parameters
+ * @throws {Error}
+ */
+Domain.prototype.getSchedulerParameters = function() {
+    return virt.virDomainGetSchedulerParametersFlags.apply(virt, arguments);
+};
+
+/**
+ * Returns the scheduler type
+ * 
+ * @return {String}
+ * @throws {Error}
+ */
+Domain.prototype.getSchedulerType = function() {
+    return virt.virDomainGetSchedulerType.apply(virt, arguments);
+};
+
+/**
+ * Returns the security label of an active domain
+ * 
+ * @return {Object} security label
+ * @throws {Error}
+ */
+Domain.prototype.getSecurityLabel = function() {
+    return virt.virDomainGetSecurityLabel.apply(virt, arguments);
+};
+
+/**
+ * Returns the security labels of an active domain
+ */
+Domain.prototype.getSecurityLabelList = function() {
+    return virt.virDomainGetSecurityLabelList.apply(virt, arguments);
+};
+
+/**
+ * Returns the domain state
+ * 
+ * @return {Object} domain state and reason
+ * @throws {Error}
+ */
+Domain.prototype.getState = function() {
+    return virt.virDomainGetState.apply(virt, arguments);
+};
+
+/**
+ * Returns the guest time in nanoseconds
+ * 
+ * @return {Number}
+ * @throws {Error}
+ */
+Domain.prototype.getTime = function() {
+    return virt.virDomainGetTime.apply(virt, arguments);
+};
+
+/**
+ * Returns the UUID for a domain
+ * 
+ * @return {String} UUID
+ * @throws {Error}
+ */
+Domain.prototype.getUUID = function() {
+    return virt.virDomainGetUUID.apply(virt, arguments);
+};
+
+/**
+ * Returns the UUID for a domain as string
+ * 
+ * @return {String} UUID string
+ * @throws {Error}
+ */
+Domain.prototype.getUUIDString = function() {
+    return virt.virDomainGetUUIDString.apply(virt, arguments);
+};
+
+/**
+ * Returns the CPU affinity setting of all virtual CPUs of domain
+ * 
+ * @param ncpumaps
+ *        the number of cpumap
+ * @param manlen
+ *        the number of bytes in one cpumap
+ * @param flags
+ *        bitwise-OR of virDomainModificationImpact Must not be
+ *        VIR_DOMAIN_AFFECT_LIVE and VIR_DOMAIN_AFFECT_CONFIG concurrently.
+ * @return {Array} the virtual CPUs
+ * @throws {Error}
+ */
+Domain.prototype.getVcpuPinInfo = function() {
+    return virt.virDomainGetVcpuPinInfo.apply(virt, arguments);
+};
+
+/**
+ * Returns the information about virtual CPUs of domain
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainModificationImpact Must not be
+ *        VIR_DOMAIN_AFFECT_LIVE and VIR_DOMAIN_AFFECT_CONFIG concurrently.
+ * @return {Array}
+ * @throws {Error}
+ */
+Domain.prototype.getVcpus = function() {
+    return virt.virDomainGetVcpus.apply(virt, arguments);
+};
+
+/**
+ * Returns the number of virtual CPUs used by the domain
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainVcpuFlags
+ * @return {Number}
+ * @throws {Error}
+ */
+Domain.prototype.getVcpusFlags = function() {
+    return virt.virDomainGetVcpusFlags.apply(virt, arguments);
+};
+
+/**
+ * Returns the XML description of the domain
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainXMLFlags
+ * @return {String}
+ * @throws {Error}
+ */
+Domain.prototype.getXMLDesc = function() {
+    return virt.virDomainGetXMLDesc.apply(virt, arguments);
+};
+
+/**
+ * Check if a domain has a managed save image as created by
+ * {@link Domain#managedSave()}.
+ * 
+ * @return {Boolean}
+ * @throws {Error}
+ */
+Domain.prototype.hasManagedSaveImage = function() {
+    return virt.virDomainHasManagedSaveImage.apply(virt, arguments);
+};
+
+/**
+ * Send NMI to the guest
+ * 
+ * @throws {Error}
+ */
+Domain.prototype.injectNMI = function() {
+    return virt.virDomainInjectNMI.apply(virt, arguments);
+};
+
+/**
+ * Returns the interfaces present in given domain along with their IP and MAC
+ * addresses
+ * 
+ * @param source {Number}
+ *        one of the virDomainInterfaceAddressesSource constants
+ * @return {Array} interface objects
+ * @throws {Error}
+ */
+Domain.prototype.getInterfaceAddresses = function() {
+    return virt.virDomainInterfaceAddresses.apply(virt, arguments);
+};
+
+/**
+ * Returns network interface stats for interfaces attached to the domain
+ * 
+ * @param path {String}
+ *        path to the interface
+ * @return {Array} interface stats
+ * @throws {Error}
+ */
+Domain.prototype.getInterfaceStats = function() {
+    return virt.virDomainInterfaceStats.apply(virt, arguments);
+};
+
+/**
+ * Determine if the domain is currently running
+ * 
+ * @return {Boolean}
+ * @throws {Error}
+ */
+Domain.prototype.isActive = function() {
+    return virt.virDomainIsActive.apply(virt, arguments);
+};
+
+/**
+ * Determine if the domain has a persistent configuration which means it will
+ * still exist after shutting down
+ * 
+ * @return {Boolean}
+ * @throws {Error}
+ */
+Domain.prototype.isPersistent = function() {
+    return virt.virDomainIsPersistent.apply(virt, arguments);
+};
+
+/**
+ * Determine if the domain has been updated
+ * 
+ * @return {Boolean}
+ * @throws {Error}
+ */
+Domain.prototype.isUpdated = function() {
+    return virt.virDomainIsUpdated.apply(virt, arguments);
+};
+
+/**
+ * Reboot a domain, the domain object is still usable thereafter, but the
+ * domain OS is being stopped for a restart
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainRebootFlagValues
+ * @throws {Error}
+ */
+Domain.prototype.reboot = function() {
+    return virt.virDomainReboot.apply(virt, arguments);
+};
+
+/**
+ * Increment the reference count on the domain
+ * 
+ * @throws {Error}
+ */
+Domain.prototype.ref = function() {
+    return virt.virDomainRef.apply(virt, arguments);
+};
+
+/**
+ * Reset a domain immediately without any guest OS shutdown. Reset emulates the
+ * power reset button on a machine, where all hardware sees the RST line set
+ * and reinitializes internal state.
+ * 
+ * @throws {Error}
+ */
+Domain.prototype.reset = function() {
+    return virt.virDomainReset.apply(virt, arguments);
+};
+
+/**
+ * Restore a domain saved to disk by {@link Domain#save()}
+ * 
+ * @param from {String}
+ *        path to the input file
+ * @param dxml {String}
+ *        (optional) XML config for adjusting guest xml used on restore
+ * @param flags {Number}
+ *        bitwise-OR of virDomainSaveRestoreFlags
+ * @throws {Error}
+ */
+Domain.prototype.restore = function() {
+    return virt.virDomainRestoreFlags.apply(virt, arguments);
+};
+
+/**
+ * Resume a suspended domain, the process is restarted from the state where it
+ * was frozen by calling {@link Domain#suspend()}
+ * 
+ * @throws {Error}
+ */
+Domain.prototype.resume = function() {
+    return virt.virDomainResume.apply(virt, arguments);
+};
+
+/**
+ * Suspend a domain and save its memory contents to a file on disk
+ * 
+ * @param to {String}
+ *        path for the output file
+ * @param dxml {String}
+ *        (optional) XML config for adjusting guest xml used on restore
+ * @param flags {Number}
+ *        bitwise-OR of virDomainSaveRestoreFlags
+ * @throws {Error}
+ */
+Domain.prototype.save = function() {
+    return virt.virDomainSaveFlags.apply(virt, arguments);
+};
+
+/**
+ * Take a screenshot of current domain console as a stream
+ * 
+ * @param screen {Number}
+ *        monitor ID to take screenshot from
+ * @return {Object} the screenshot object
+ * @throws {Error}
+ */
+Domain.prototype.screenshot = function() {
+    return virt.virDomainScreenshot.apply(virt, arguments);
+};
+
+/**
+ * Send key(s) to the guest.
+ * 
+ * @param codeset {Number}
+ *        the code set of keycodes, from virKeycodeSet
+ * @param holdtime {Number}
+ *        the duration (in milliseconds) that the keys will be held
+ * @param keycodes {Array}
+ *        array of keycodes
+ * @throws {Error}
+ */
+Domain.prototype.sendKey = function() {
+    return virt.virDomainSendKey.apply(virt, arguments);
+};
+
+/**
+ * Send a signal to the designated process in the guest
+ * 
+ * @param pid {Number}
+ *        a positive integer process ID, or negative integer process group ID
+ * @param signal {Number}
+ *        a signal from the virDomainProcessSignal enum
+ * @param flags {Number}
+ *        one of the virDomainProcessSignalFlag values
+ * @throws {Error}
+ */
+Domain.prototype.sendProcessSignal = function() {
+    return virt.virDomainSendProcessSignal.apply(virt, arguments);
+};
+
+/**
+ * Configure the domain to be automatically started when the host machine boots.
+ * 
+ * @param autostart {Boolean}
+ *        whether the domain should be automatically started
+ * @throws {Error}
+ */
+Domain.prototype.setAutostart = function() {
+    return virt.virDomainSetAutostart.apply(virt, arguments);
+};
+
+/**
+ * Sets the appropriate domain element given by type to the value of metadata
+ * 
+ * @param type {Number}
+ *        type of metadata, from virDomainMetadataType
+ * @param metadata {String}
+          new metadata text
+ * @param key {String}
+          XML namespace key, or null
+ * @param uri {String}
+ *        XML namespace URI, or null
+ * @param flags {Number}
+ *        bitwise-OR of virDomainModificationImpact
+ * @throws {Error}
+ */
+Domain.prototype.setMetadata = function() {
+    return virt.virDomainSetMetadata.apply(virt, arguments);
+};
+
+/**
+ * When a domain is suspended or restored from a file the domain's OS has no
+ * idea that there was a big gap in the time. Depending on how long the gap
+ * was, NTP might not be able to resynchronize the guest.
+ * 
+ * @param nanoseconds {Number}
+ *        time to set, in nanoseconds
+ * @param flags {Number}
+ *        bitwise-OR of virDomainSetTimeFlags
+ * @throws {Error}
+ */
+Domain.prototype.setTime = function() {
+    return virt.virDomainSetTime.apply(virt, arguments);
+};
+
+/**
+ * Shutdown a domain
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of virDomainShutdownFlagValues
+ * @throws {Error}
+ */
+Domain.prototype.shutdown = function() {
+    return virt.virDomainShutdownFlags.apply(virt, arguments);
+};
+
+/**
+ * Suspends an active domain, the process is frozen without further access to
+ * CPU resources and I/O but the memory used by the domain at the hypervisor
+ * level will stay allocated
+ * 
+ * @throws {Error}
+ */
+Domain.prototype.suspend = function() {
+    return virt.virDomainSuspend.apply(virt, arguments);
+};
+
+/**
+ * Undefine a domain. If the domain is running, it's converted to transient
+ * domain, without stopping it. If the domain is inactive, the domain
+ * configuration is removed.
+ * 
+ * @param flags {Number}
+ *        bitwise-OR of supported virDomainUndefineFlagsValues
+ * @throws {Error}
+ */
+Domain.prototype.undefine = function() {
+    return virt.virDomainUndefineFlags.apply(virt, arguments);
+};
+
+/**
+ * @param xml {String}
+ *        XML description of one device
+ * @param flags {Number}
+ *        bitwise-OR of virDomainDeviceModifyFlags
+ * @throws {Error}
+ */
+Domain.prototype.updateDevice = function() {
+    return virt.virDomainUpdateDeviceFlags.apply(virt, arguments);
 };
 
 /**
@@ -749,6 +1884,7 @@ Interface.prototype.undefine = function() {
     }
 })([
     Connection.prototype,
+    Domain.prototype,
     Interface.prototype,
 ]);
 
@@ -884,13 +2020,13 @@ function PageAllocation() {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Connection.html">Connection</a></li><li><a href="ConnectionAuth.html">ConnectionAuth</a></li><li><a href="Interface.html">Interface</a></li><li><a href="NodeInfo.html">NodeInfo</a></li><li><a href="PageAllocation.html">PageAllocation</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getVersion">getVersion</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Connection.html">Connection</a></li><li><a href="ConnectionAuth.html">ConnectionAuth</a></li><li><a href="Domain.html">Domain</a></li><li><a href="Interface.html">Interface</a></li><li><a href="NodeInfo.html">NodeInfo</a></li><li><a href="PageAllocation.html">PageAllocation</a></li></ul><h3>Global</h3><ul><li><a href="global.html#getVersion">getVersion</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta2</a> on Sun Apr 12 2015 15:35:57 GMT+0800 (CST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta2</a> on Sun Apr 12 2015 23:43:12 GMT+0800 (CST)
 </footer>
 
 <script> prettyPrint(); </script>

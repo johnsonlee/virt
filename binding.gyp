@@ -4,6 +4,7 @@
             "target_name" : "virt",
             "sources" : [
                 "src/connection.cc",
+                "src/domain.cc",
                 "src/interface.cc",
                 "src/virt.cc",
             ],
