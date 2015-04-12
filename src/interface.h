@@ -8,8 +8,9 @@
 
 class Interface : public Pointer<virInterfacePtr> {
 private:
-
     static v8::Persistent<v8::Function> constructor;
+
+    inline Interface(virInterfacePtr ptr) : Pointer(ptr) {}
 
     template <class F> friend class Pointer;
 };

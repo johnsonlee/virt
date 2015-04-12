@@ -32,7 +32,7 @@ public:
                 return;
             }
 
-            Pointer<T> *ptr = new Pointer<T>(static_cast<T>(v8::External::Cast(*args[0])->Value()));
+            S *ptr = new S(static_cast<T>(v8::External::Cast(*args[0])->Value()));
             ptr->Wrap(args.This());
             args.GetReturnValue().Set(args.This());
         } else {
@@ -50,7 +50,8 @@ public:
         v8::Local<v8::Function> ctor = v8::Local<v8::Function>::New(isolate, S::constructor);
         args.GetReturnValue().Set(ctor->NewInstance(1, argv));
     }
-    inline explicit Pointer(T t = NULL) : ptr(t) { }
+
+    inline Pointer(T t = NULL) : ptr(t) { }
 
     inline T operator*() const { return this->ptr; }
 

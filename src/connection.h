@@ -8,8 +8,9 @@
 
 class Connection : public Pointer<virConnectPtr> {
 private:
-
     static v8::Persistent<v8::Function> constructor;
+
+    inline Connection(virConnectPtr ptr) : Pointer(ptr) {}
 
     template <class F> friend class Pointer;
 };
