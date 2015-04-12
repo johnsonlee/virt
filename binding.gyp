@@ -3,7 +3,8 @@
         {
             "target_name" : "virt",
             "sources" : [
-                "src/native-class.cc",
+                "src/connection.cc",
+                "src/interface.cc",
                 "src/virt.cc",
             ],
             "include_dirs" : [

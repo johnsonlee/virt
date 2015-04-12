@@ -18,6 +18,14 @@ var virt = require('./build/Release/virt.node');
 var Connection = virt.Connection;
 
 /**
+ * Network Interface
+ * 
+ * @class
+ * @see {@link http://libvirt.org/html/libvirt-libvirt-interface.html#virInterface}
+ */
+var Interface = virt.Interface;
+
+/**
  * <p>This function should be called first to get a connection to the
  * Hypervisor and xen store</p>
  * 
@@ -644,6 +652,8 @@ function PageAllocation() {
     };
 
     this.Connection = Connection;
+
+    this.Interface = Interface;
 
 }).call(module.exports);
 
