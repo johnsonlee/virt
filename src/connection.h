@@ -6,13 +6,15 @@
 
 #include "pointer.h"
 
+template class Pointer<virConnectPtr>;
+
 class Connection : public Pointer<virConnectPtr> {
 private:
     static v8::Persistent<v8::Function> constructor;
 
     inline Connection(virConnectPtr ptr) : Pointer(ptr) {}
 
-    template <class F> friend class Pointer;
+    friend class Pointer<virConnectPtr>;
 };
 
 #endif /* __CONNECTION_H__ */

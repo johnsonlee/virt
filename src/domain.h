@@ -6,13 +6,15 @@
 
 #include "pointer.h"
 
+template class Pointer<virDomainPtr>;
+
 class Domain : public Pointer<virDomainPtr> {
 private:
     static v8::Persistent<v8::Function> constructor;
 
     inline Domain(virDomainPtr ptr) : Pointer(ptr) {}
 
-    template <class F> friend class Pointer;
+    friend class Pointer<virDomainPtr>;
 };
 
 #endif /* __DOMAIN_H__ */
