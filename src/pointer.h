@@ -4,7 +4,42 @@
 #include <node.h>
 #include <node_object_wrap.h>
 
-#include "throw.h"
+#include "virt-error.h"
+
+#define TRACE() printf("%s#%d\n", __FUNCTION__, __LINE__)
+
+#define CHK_NATIVE_CLASS_FUNCTION_ARGUMENTS(args, isolate, argc) \
+    do {                                                         \
+        if ((args).Length() < (argc)) {                          \
+            virt::throwError((isolate), "Too few arguments");    \
+            return;                                              \
+        }                                                        \
+                                                                 \
+        if (!(args)[0]->IsObject()) {                            \
+            virt::throwTypeError((isolate), "Invalid arguments");\
+            return;                                              \
+        }                                                        \
+    } while (0);
+
+#define CHK_NATIVE_CLASS_INSTANCE_ACCESSIBILITY(isolate, native) \
+    do {                                                         \
+        if (NULL == (native)) {                                  \
+            virt::throwError((isolate), "Invalid arguments");    \
+            return;                                              \
+        }                                                        \
+                                                                 \
+        if ((native)->IsNull()) {                                \
+            return;                                              \
+        }                                                        \
+    } while (0);
+
+#define CHK_ARGUMENT_TYPE(isolate, arg, type)                    \
+    do {                                                         \
+        if (!arg->Is ## type()) {                                \
+            virt::throwTypeError(isolate, "Invalid arguments");  \
+            return;                                              \
+        }                                                        \
+    } while (0);
 
 template <typename T>
 class Pointer : public node::ObjectWrap {
@@ -67,7 +102,7 @@ private:
 
         if (args.IsConstructCall()) {
             if (!args[0]->IsExternal()) {
-                throwError(isolate, "Unsupported operation");
+                virt::throwError(isolate, "Unsupported operation");
                 return;
             }
 

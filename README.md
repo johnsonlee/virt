@@ -14,13 +14,9 @@ The wrappered API is almost the same as libvirt, about libvirt, please see:
 - libvirt
 - node.js v0.10.x or higher
 
-## References
-
-Please see [API doc](https://rawgit.com/johnsonlee/virt/master/doc/index.html)
-
 ## Example
 
-``` js
+```
 var Connection = require('virt').Connection;
 
 var conn = Connection.open('vbox:///session');
@@ -46,9 +42,433 @@ try {
 }
 ```
 
-## TODO
+## libvirt API implementation matrix
 
- - Add non-*nix platform support
+| Libvirt API                                 | Implemented |
+|:--------------------------------------------|:-----------:|
+| virConnectBaselineCPU                       |      ✓      |
+| virConnectClose                             |      ✓      |
+| virConnectCompareCPU                        |      ✓      |
+| virConnectDomainEventDeregister             |             |
+| virConnectDomainEventDeregisterAny          |             |
+| virConnectDomainEventRegister               |             |
+| virConnectDomainEventRegisterAny            |             |
+| virConnectDomainQemuMonitorEventDeregister  |             |
+| virConnectDomainQemuMonitorEventRegister    |             |
+| virConnectDomainXMLFromNative               |             |
+| virConnectDomainXMLToNative                 |             |
+| virConnectGetAllDomainStats                 |             |
+| virConnectGetCPUModelNames                  |             |
+| virConnectGetCapabilities                   |      ✓      |
+| virConnectGetDomainCapabilities             |      ✓      |
+| virConnectGetHostname                       |      ✓      |
+| virConnectGetLibVersion                     |      ✓      |
+| virConnectGetMaxVcpus                       |      ✓      |
+| virConnectGetSysinfo                        |      ✓      |
+| virConnectGetType                           |      ✓      |
+| virConnectGetVersion                        |      ✓      |
+| virConnectIsAlive                           |      ✓      |
+| virConnectIsEncrypted                       |      ✓      |
+| virConnectIsSecure                          |      ✓      |
+| virConnectListAllDomains                    |             |
+| virConnectListDefinedDomains                |             |
+| virConnectListDomains                       |             |
+| virConnectNumOfDefinedDomains               |             |
+| virConnectNumOfDomains                      |             |
+| virConnectOpen                              |      ✓      |
+| virConnectOpenAuth                          |             |
+| virConnectOpenReadOnly                      |      ✓      |
+| virConnectSetKeepAlive                      |      ✓      |
+| virConnectSupportsFeature                   |             |
+| virDomainAbortJob                           |             |
+| virDomainAddIOThread                        |             |
+| virDomainAttachDevice                       |             |
+| virDomainAttachDeviceFlags                  |             |
+| virDomainBlockCommit                        |             |
+| virDomainBlockCopy                          |             |
+| virDomainBlockJobAbort                      |             |
+| virDomainBlockJobSetSpeed                   |             |
+| virDomainBlockPeek                          |             |
+| virDomainBlockPull                          |             |
+| virDomainBlockRebase                        |             |
+| virDomainBlockResize                        |             |
+| virDomainBlockStats                         |             |
+| virDomainBlockStatsFlags                    |             |
+| virDomainCoreDump                           |             |
+| virDomainCoreDumpWithFormat                 |             |
+| virDomainCreate                             |             |
+| virDomainCreateLinux                        |             |
+| virDomainCreateWithFiles                    |             |
+| virDomainCreateWithFlags                    |             |
+| virDomainCreateXML                          |             |
+| virDomainCreateXMLWithFiles                 |             |
+| virDomainDefineXML                          |             |
+| virDomainDefineXMLFlags                     |             |
+| virDomainDelIOThread                        |             |
+| virDomainDestroy                            |             |
+| virDomainDestroyFlags                       |             |
+| virDomainDetachDevice                       |             |
+| virDomainDetachDeviceFlags                  |             |
+| virDomainFSFreeze                           |             |
+| virDomainFSThaw                             |             |
+| virDomainFSTrim                             |             |
+| virDomainGetAutostart                       |             |
+| virDomainGetBlkioParameters                 |             |
+| virDomainGetBlockInfo                       |             |
+| virDomainGetBlockIoTune                     |             |
+| virDomainGetBlockJobInfo                    |             |
+| virDomainGetCPUStats                        |             |
+| virDomainGetControlInfo                     |             |
+| virDomainGetDiskErrors                      |             |
+| virDomainGetEmulatorPinInfo                 |             |
+| virDomainGetFSInfo                          |             |
+| virDomainGetHostname                        |             |
+| virDomainGetIOThreadInfo                    |             |
+| virDomainGetInfo                            |             |
+| virDomainGetInterfaceParameters             |             |
+| virDomainGetJobInfo                         |             |
+| virDomainGetJobStats                        |             |
+| virDomainGetMaxMemory                       |             |
+| virDomainGetMaxVcpus                        |             |
+| virDomainGetMemoryParameters                |             |
+| virDomainGetMetadata                        |             |
+| virDomainGetNumaParameters                  |             |
+| virDomainGetOSType                          |             |
+| virDomainGetSchedulerParameters             |             |
+| virDomainGetSchedulerParametersFlags        |             |
+| virDomainGetSchedulerType                   |             |
+| virDomainGetSecurityLabel                   |             |
+| virDomainGetSecurityLabelList               |             |
+| virDomainGetState                           |             |
+| virDomainGetTime                            |             |
+| virDomainGetVcpuPinInfo                     |             |
+| virDomainGetVcpus                           |             |
+| virDomainGetVcpusFlags                      |             |
+| virDomainGetXMLDesc                         |             |
+| virDomainHasCurrentSnapshot                 |             |
+| virDomainHasManagedSaveImage                |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+|                                             |             |
+
+
+
+
+## References
+
+Please see [API References](https://rawgit.com/johnsonlee/virt/master/doc/index.html).
 
 ## License
 

@@ -773,6 +773,37 @@ Connection.prototype.defineDomainXMLFlags = function() {
 };
 
 /**
+ * Adds a callback to receive notifications of domain lifecycle events
+ * occurring on a connection. This function requires that an event loop has
+ * been previously registered
+ */
+Domain.prototype.addEventListener = function(domainEventCallback, opaque) {
+    return virt.virConnectDomainEventRegister.apply(virt, arguments);
+};
+
+/**
+ * Removes a callback previously registered
+ * 
+ * @param domainEventCallback {Function}
+ *        callback to the function handling domain events
+ * @throws {Error}
+ */
+Domain.prototype.removeEventListener = function(domainEventCallback) {
+    return virt.virConnectDomainEventDeregister.apply(virt, arguments);
+};
+
+/**
+ * Removes an event callback
+ * 
+ * @param callbackId
+ *        the callback identifier
+ * @throws {Error}
+ */
+Domain.prototype.removeEventListenerAny = function(callbackId) {
+    return virt.virConnectDomainEventDeregisterAny.apply(virt, arguments);
+};
+
+/**
  * Create a virtual device attachment to backend
  * 
  * @param xml {String}
